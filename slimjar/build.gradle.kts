@@ -71,7 +71,7 @@ publishing {
 }
 
 tasks.jar {
-    dependsOn(project(":loader-agent"))
+    dependsOn(project(":loader-agent").tasks.jar)
     doFirst {
         copy {
             from(project(":loader-agent").tasks.getByName("jar").outputs.files.singleFile)
