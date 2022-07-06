@@ -6,7 +6,7 @@ plugins {
     `java-gradle-plugin`
     `kotlin-dsl`
     groovy
-    kotlin("jvm") version "1.7.0"
+    kotlin("jvm") version "1.7.10"
     id("com.gradle.plugin-publish") version "0.21.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
     `maven-publish`
@@ -24,16 +24,16 @@ configurations["compileOnly"].extendsFrom(shadowImplementation)
 configurations["testImplementation"].extendsFrom(shadowImplementation)
 
 dependencies {
-    shadowImplementation(kotlin("stdlib", "1.7.0"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3")
+    shadowImplementation(kotlin("stdlib", "1.7.10"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     shadowImplementation(project(":slimjar"))
-    shadowImplementation("com.google.code.gson:gson:2.9.0")
+    shadowImplementation("com.google.code.gson:gson:2.9.1")
 
     compileOnly("com.github.jengelman.gradle.plugins:shadow:6.1.0")
 
     testImplementation("com.github.jengelman.gradle.plugins:shadow:6.1.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.0")
     testImplementation("org.assertj:assertj-core:3.23.1")
 }
 

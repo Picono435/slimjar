@@ -1,6 +1,3 @@
-rootProject.name = 'slimjar'
-include 'slimjar'
-include 'slimjar-external'
-include 'gradle-plugin'
-include 'loader-agent'
+rootProject.name = "slimjar"
+include("slimjar", "slimjar-external", "gradle-plugin", "loader-agent")
 
