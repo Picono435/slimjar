@@ -28,7 +28,6 @@ import io.github.slimjar.resolver.data.Mirror;
 import io.github.slimjar.resolver.data.Repository;
 
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
