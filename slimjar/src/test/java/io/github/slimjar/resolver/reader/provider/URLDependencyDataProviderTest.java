@@ -61,8 +61,7 @@ public class URLDependencyDataProviderTest extends TestCase {
         final String userHome = System.getProperty("user.home");
         final String defaultPath = String.format("%s/.slimjar", userHome);
         final File file = new File(defaultPath);
-        final Path path = file.toPath();
-        DEFAULT_DOWNLOAD_DIRECTORY = path;
+        DEFAULT_DOWNLOAD_DIRECTORY = file.toPath();
     }
 
     public void testFileDependencyDataProvider() throws Exception {

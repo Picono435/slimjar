@@ -30,10 +30,12 @@ import java.net.URL;
 import java.net.URLConnection;
 
 public final class Connections {
-    private static final String SLIMJAR_USER_AGENT = "SlimjarApplication/* URLDependencyDownloader";
-    private Connections() {
 
+    private Connections() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("This class is not meant to be instantiated");
     }
+
+    private static final String SLIMJAR_USER_AGENT = "SlimjarApplication/* URLDependencyDownloader";
 
     public static URLConnection createDownloadConnection(final URL url) throws IOException {
         final URLConnection connection =  url.openConnection();
@@ -41,6 +43,7 @@ public final class Connections {
             final HttpURLConnection httpConnection = (HttpURLConnection) connection;
             connection.addRequestProperty("User-Agent", SLIMJAR_USER_AGENT);
             final int responseCode = httpConnection.getResponseCode();
+
             if (responseCode != HttpURLConnection.HTTP_OK) {
                 throw new IOException("Could not download from" + url);
             }

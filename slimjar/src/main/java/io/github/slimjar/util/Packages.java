@@ -25,8 +25,9 @@
 package io.github.slimjar.util;
 
 public final class Packages {
-    private Packages() {
 
+    private Packages() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("This class is not meant to be instantiated");
     }
 
     /**

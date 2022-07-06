@@ -35,7 +35,6 @@ import java.net.URL;
 import java.util.Collections;
 
 public final class MockDependencyData {
-    private final String sampleDependencyData = "{\"mirrors\": [],\"repositories\": [{\"url\": \"https://repo.maven.apache.org/maven2/\"}],\"dependencies\": [{\"groupId\": \"com.google.code.gson\",\"artifactId\": \"gson\",\"version\": \"2.8.6\",\"transitive\": []}],\"relocations\": []}";
 
     private final DependencyData expectedSample = new DependencyData(
             Collections.emptySet(),
@@ -56,7 +55,7 @@ public final class MockDependencyData {
     }
 
     public String getSampleDependencyData() {
-        return sampleDependencyData;
+        return "{\"mirrors\": [],\"repositories\": [{\"url\": \"https://repo.maven.apache.org/maven2/\"}],\"dependencies\": [{\"groupId\": \"com.google.code.gson\",\"artifactId\": \"gson\",\"version\": \"2.8.6\",\"transitive\": []}],\"relocations\": []}";
     }
 
     public DependencyData getExpectedSample() {

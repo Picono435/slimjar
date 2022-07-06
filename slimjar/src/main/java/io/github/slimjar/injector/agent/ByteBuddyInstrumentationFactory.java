@@ -137,6 +137,6 @@ public final class ByteBuddyInstrumentationFactory implements InstrumentationFac
     }
 
     private static String generatePattern() {
-        return String.format("slimjar.%s", UUID.randomUUID().toString());
+        return String.format("slimjar.%s", UUID.randomUUID());
     }
 }

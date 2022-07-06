@@ -27,8 +27,9 @@ package io.github.slimjar.util;
 import io.github.slimjar.resolver.data.Repository;
 
 public final class Repositories {
-    private Repositories() {
 
+    private Repositories() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("This class is not meant to be instantiated");
     }
 
     public static String fetchFormattedUrl(final Repository repository) {

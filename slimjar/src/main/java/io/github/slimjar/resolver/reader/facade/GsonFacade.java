@@ -25,7 +25,6 @@
 package io.github.slimjar.resolver.reader.facade;
 
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 
 public interface GsonFacade {

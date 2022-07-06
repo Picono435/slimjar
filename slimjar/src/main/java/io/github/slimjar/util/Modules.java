@@ -34,9 +34,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class Modules {
-    private Modules() {
+
+    private Modules() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("This class is not meant to be instantiated");
     }
 
     public static URL findModule(final String moduleName) {
@@ -58,10 +61,11 @@ public final class Modules {
     public static Collection<String> findLocalModules() throws URISyntaxException, IOException {
         final URL url = Modules.class.getProtectionDomain().getCodeSource().getLocation();
         final Path resourcesPath = Paths.get(url.toURI());
-        return Files.walk(resourcesPath, 1)
-                .filter(path -> path.endsWith(".isolated-jar"))
-                .map(Path::getFileName)
-                .map(Path::toString)
-                .collect(Collectors.toSet());
+
+        try (Stream<Path> stream = Files.walk(resourcesPath, 1)) {
+            return stream.filter(path -> path.endsWith(".isolated-jar"))
+                    .map(path -> path.getFileName().toString())
+                    .collect(Collectors.toList());
+        }
     }
 }

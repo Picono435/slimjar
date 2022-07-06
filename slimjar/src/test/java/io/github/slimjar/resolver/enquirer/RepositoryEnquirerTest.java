@@ -30,7 +30,6 @@ import io.github.slimjar.resolver.pinger.URLPinger;
 import io.github.slimjar.resolver.strategy.MavenChecksumPathResolutionStrategy;
 import io.github.slimjar.resolver.strategy.MavenPomPathResolutionStrategy;
 import io.github.slimjar.resolver.strategy.PathResolutionStrategy;
-import io.github.slimjar.util.Repositories;
 import junit.framework.TestCase;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;

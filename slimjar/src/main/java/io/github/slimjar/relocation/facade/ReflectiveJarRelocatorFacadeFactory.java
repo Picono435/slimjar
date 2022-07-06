@@ -32,7 +32,6 @@ import io.github.slimjar.relocation.RelocationRule;
 import io.github.slimjar.resolver.data.Dependency;
 import io.github.slimjar.resolver.data.DependencyData;
 import io.github.slimjar.resolver.data.Repository;
-import io.github.slimjar.resolver.mirrors.SimpleMirrorSelector;
 import io.github.slimjar.util.Packages;
 
 import java.io.File;
@@ -42,7 +41,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;

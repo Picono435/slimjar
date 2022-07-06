@@ -89,10 +89,8 @@ abstract class SlimJar @Inject constructor(private val config: Configuration) : 
     @Input
     var shade = true
 
+    @get:OutputDirectory
     val outputDirectory: File = File("${project.buildDir}/resources/slimjar/")
-        @OutputDirectory
-        get
-
 
     init {
         group = "slimJar"
@@ -162,7 +160,7 @@ abstract class SlimJar @Inject constructor(private val config: Configuration) : 
 
         // Note: Commented out to allow creation of empty dependency file
         // if (dependencies.isEmpty() || repositories.isEmpty()) return
-        //println("Folder exists: ${folder.exists()}")
+        // println("Folder exists: ${folder.exists()}")
         if (outputDirectory.exists().not()) outputDirectory.mkdirs()
 
         val file = File(outputDirectory, "slimjar.json")
@@ -275,7 +273,6 @@ abstract class SlimJar @Inject constructor(private val config: Configuration) : 
         if (shadowWriteFolder.exists().not()) shadowWriteFolder.mkdirs()
         file.copyTo(File(shadowWriteFolder, file.name), true)
     }
-
 
     /**
      * Internal getter required because Gradle will think an internal property is an action

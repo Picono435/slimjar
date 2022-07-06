@@ -25,7 +25,10 @@
 package io.github.slimjar.util;
 
 public final class Parameters {
-    private Parameters() { }
+
+    private Parameters() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("This class is not meant to be instantiated");
+    }
 
     public static Class<?>[] typesFrom(final Object... args) {
         Class<?>[] result = new Class[args.length];

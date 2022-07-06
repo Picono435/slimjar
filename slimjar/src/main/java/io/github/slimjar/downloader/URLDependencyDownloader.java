@@ -42,8 +42,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public final class URLDependencyDownloader implements DependencyDownloader {
     private static final byte[] BOM_BYTES = "bom-file".getBytes();

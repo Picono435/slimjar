@@ -25,7 +25,6 @@
 package io.github.slimjar.downloader.strategy;
 
 
-import io.github.slimjar.downloader.output.DependencyOutputWriterFactory;
 import io.github.slimjar.resolver.data.Dependency;
 
 import java.io.File;

@@ -24,12 +24,17 @@
 
 package io.github.slimjar.injector.agent;
 
-import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 
 public final class ClassLoaderAgent {
+
+    private ClassLoaderAgent() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("This class is not meant to be instantiated");
+    }
+
     private static Instrumentation instrumentation;
-    public static void agentmain(final String args, final Instrumentation instrumentation) throws IOException {
+
+    public static void agentmain(final String args, final Instrumentation instrumentation) {
         ClassLoaderAgent.instrumentation = instrumentation;
     }
 

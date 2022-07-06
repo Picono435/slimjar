@@ -28,12 +28,13 @@ import io.github.slimjar.app.builder.ApplicationBuilder;
 import io.github.slimjar.app.builder.IsolationConfiguration;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URLClassLoader;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 
+// TODO: Needed?
 @Deprecated
 public final class ApplicationFactory {
+
     public Application createIsolatedApplication(final Collection<String> moduleNames, final String fqClassName, final Object... args) throws ClassCastException {
         return createIsolatedApplication(moduleNames, fqClassName, ClassLoader.getSystemClassLoader().getParent(), args);
     }

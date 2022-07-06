@@ -33,7 +33,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
-import java.util.Objects;
 
 public final class HttpURLPinger implements URLPinger {
     private static final ProcessLogger LOGGER = LogDispatcher.getMediatingLogger();

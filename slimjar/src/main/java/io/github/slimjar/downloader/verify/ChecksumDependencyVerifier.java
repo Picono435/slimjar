@@ -41,8 +41,6 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public final class ChecksumDependencyVerifier implements DependencyVerifier {
     private static final ProcessLogger LOGGER = LogDispatcher.getMediatingLogger();
