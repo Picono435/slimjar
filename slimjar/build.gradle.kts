@@ -6,7 +6,7 @@ plugins {
     `maven-publish`
 }
 
-version = "1.2.6"
+version = "1.2.8"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -37,7 +37,7 @@ publishing {
         pom {
             name.set("SlimJar")
             description.set("A simple and robust runtime dependency manager for JVM languages.")
-            url.set("http://www.github.com/SlimJar/slimjar")
+            url.set("http://www.github.com/DaRacci/slimjar")
             licenses {
                 license {
                     name.set("The MIT License")
@@ -49,16 +49,24 @@ publishing {
                     id.set("vshnv")
                     name.set("Vaishnav Anil")
                     email.set("vaishnavanil7th@gmail.com")
+                    roles.set(listOf("Project starter"))
                 }
                 developer {
                     id.set("ipsk")
                     name.set("Mateus Moreira")
+                    roles.set(listOf("Previous Maintainer"))
+                }
+                developer {
+                    id.set("Racci")
+                    name.set("James Draycott")
+                    email.set("racci@racci.dev")
+                    roles.set(listOf("MAINTAINER"))
                 }
             }
             scm {
-                connection.set("https://github.com/SlimJar/slimjar")
-                developerConnection.set("https://github.com/SlimJar/slimjar.git")
-                url.set("https://github.com/SlimJar/slimjar")
+                connection.set("https://github.com/DaRacci/slimjar")
+                developerConnection.set("https://github.com/DaRacci/slimjar.git")
+                url.set("https://github.com/DaRacci/slimjar")
             }
         }
     }

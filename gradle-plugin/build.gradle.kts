@@ -24,8 +24,10 @@ configurations["compileOnly"].extendsFrom(shadowImplementation)
 configurations["testImplementation"].extendsFrom(shadowImplementation)
 
 dependencies {
-    shadowImplementation(kotlin("stdlib", "1.7.10"))
+    implementation(kotlin("bom:1.7.10"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+
+    shadowImplementation(kotlin("stdlib"))
     shadowImplementation(project(":slimjar"))
     shadowImplementation("com.google.code.gson:gson:2.9.1")
 
@@ -103,7 +105,7 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions {
             jvmTarget = "1.8"
-            freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
+            freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
         }
     }
 
@@ -146,12 +148,12 @@ gradlePlugin {
 }
 
 pluginBundle {
-    website = "https://github.com/SlimJar/slimjar"
-    vcsUrl = "https://github.com/SlimJar/slimjar"
+    website = "https://github.com/DaRacci/slimjar"
+    vcsUrl = "https://github.com/DaRacci/slimjar"
     tags = listOf("runtime dependency", "relocation")
     description = "Very easy to setup and downloads any public dependency at runtime!"
 }
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
-    languageVersion = "1.4"
+    languageVersion = "1.7"
 }
