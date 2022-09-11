@@ -30,7 +30,6 @@ import io.github.slimjar.resolver.mirrors.SimpleMirrorSelector;
 import io.github.slimjar.resolver.reader.dependency.DependencyReader;
 import io.github.slimjar.resolver.reader.dependency.GsonDependencyReader;
 import io.github.slimjar.resolver.reader.facade.ReflectiveGsonFacadeFactory;
-import junit.framework.TestCase;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -43,8 +42,10 @@ import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Collections;
+import org.junit.jupiter.api.Assertions;
+import org.junit.Test;
 
-public class DependencyReaderTest extends TestCase {
+public class DependencyReaderTest {
 
     private static final Path DEFAULT_DOWNLOAD_DIRECTORY;
     private static final Collection<Repository> CENTRAL_MIRRORS;
@@ -59,12 +60,14 @@ public class DependencyReaderTest extends TestCase {
         final String defaultPath = String.format("%s/.slimjar", userHome);
         DEFAULT_DOWNLOAD_DIRECTORY = new File(defaultPath).toPath();
     }
+
+    @Test
     public void testDependencyReaderParse() throws IOException, NoSuchAlgorithmException, ReflectiveOperationException, URISyntaxException {
         final MockDependencyData mockDependencyData = new MockDependencyData();
         final DependencyReader dependencyReader = new GsonDependencyReader(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS).createFacade());
         final InputStream inputStream = new ByteArrayInputStream(mockDependencyData.getSampleDependencyData().getBytes());
         final DependencyData dependencyData = dependencyReader.read(inputStream);
-        assertEquals("Read dependency properly", dependencyData, mockDependencyData.getExpectedSample());
+        Assertions.assertEquals(dependencyData, mockDependencyData.getExpectedSample(), "Read dependency properly");
     }
 
 }

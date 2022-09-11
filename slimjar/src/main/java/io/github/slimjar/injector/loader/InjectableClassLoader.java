@@ -32,7 +32,7 @@ public abstract class InjectableClassLoader extends URLClassLoader implements In
         registerAsParallelCapable();
     }
 
-    public InjectableClassLoader(URL[] urls, ClassLoader parent) {
+    protected InjectableClassLoader(URL[] urls, ClassLoader parent) {
         super(urls, parent);
     }
 

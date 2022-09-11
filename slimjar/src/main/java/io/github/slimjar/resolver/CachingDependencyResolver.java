@@ -33,7 +33,6 @@ import io.github.slimjar.resolver.enquirer.RepositoryEnquirer;
 import io.github.slimjar.resolver.enquirer.RepositoryEnquirerFactory;
 import io.github.slimjar.resolver.pinger.URLPinger;
 
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -60,26 +59,30 @@ public final class CachingDependencyResolver implements DependencyResolver {
     }
 
     private ResolutionResult attemptResolve(final Dependency dependency) {
-        final ResolutionResult preResolvedResult = preResolvedResults.get(dependency.toString());
+        final var preResolvedResult = preResolvedResults.get(dependency.toString()) != null ? preResolvedResults.get(dependency.toString()) : cachedResults.get(dependency);
+
         if (preResolvedResult != null) {
-            if (preResolvedResult.isAggregator()) {
-                return preResolvedResult;
-            }
-            final boolean isDependencyURLValid = urlPinger.ping(preResolvedResult.getDependencyURL());
-            final URL checksumURL = preResolvedResult.getChecksumURL();
-            final boolean isChecksumURLValid = checksumURL == null || urlPinger.ping(checksumURL);
-            if (isDependencyURLValid && isChecksumURLValid) {
+            if (preResolvedResult.isChecked()) return preResolvedResult;
+            if (preResolvedResult.isAggregator()) return preResolvedResult;
+
+            final var isDependencyValid = urlPinger.ping(preResolvedResult.getDependencyURL());
+            final var isChecksumValid = preResolvedResult.getChecksumURL() == null || urlPinger.ping(preResolvedResult.getChecksumURL());
+
+            if (isDependencyValid && isChecksumValid) {
+                preResolvedResult.setChecked();
                 return preResolvedResult;
             }
         }
 
-
-        final Optional<ResolutionResult> result = repositories.stream().parallel()
-                .map(enquirer -> enquirer.enquire(dependency))
+        final var result = repositories.stream().parallel()
+                .map(repositoryEnquirer -> repositoryEnquirer.enquire(dependency))
                 .filter(Objects::nonNull)
                 .findFirst();
-        final String resolvedResult = result.map(ResolutionResult::getDependencyURL).map(Objects::toString).orElse(FAILED_RESOLUTION_MESSAGE);
-        LOGGER.log("Resolved {0} @ {1}", dependency.getArtifactId(), resolvedResult);
+        final var resolvedResult = result.map(ResolutionResult::getDependencyURL)
+                .map(Objects::toString)
+                .orElse(FAILED_RESOLUTION_MESSAGE);
+
+        LOGGER.log("Resolved %s @ %s", dependency.artifactId(), resolvedResult);
         return result.orElse(null);
     }
 }

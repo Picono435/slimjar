@@ -63,7 +63,7 @@ public final class ByteBuddyInstrumentationFactory implements InstrumentationFac
     private final ModuleExtractor extractor;
     private final JarRelocatorFacadeFactory relocatorFacadeFactory;
 
-    public ByteBuddyInstrumentationFactory(final JarRelocatorFacadeFactory relocatorFacadeFactory) throws ReflectiveOperationException, NoSuchAlgorithmException, IOException, URISyntaxException {
+    public ByteBuddyInstrumentationFactory(final JarRelocatorFacadeFactory relocatorFacadeFactory) {
         this.relocatorFacadeFactory = relocatorFacadeFactory;
         this.agentJarUrl = InstrumentationInjectable.class.getClassLoader().getResource(AGENT_JAR);
         this.extractor = new TemporaryModuleExtractor();
@@ -96,9 +96,9 @@ public final class ByteBuddyInstrumentationFactory implements InstrumentationFac
                 .generate();
 
         ApplicationBuilder.injecting("SlimJar-Agent", classLoader)
-                .dataProviderFactory((dataUrl) -> ByteBuddyInstrumentationFactory::getDependency)
-                .relocatorFactory((rules) -> new PassthroughRelocator())
-                .relocationHelperFactory((rel) -> (dependency, file) -> file)
+                .dataProviderFactory(dataUrl -> ByteBuddyInstrumentationFactory::getDependency)
+                .relocatorFactory(rules -> new PassthroughRelocator())
+                .relocationHelperFactory(rel -> (dependency, file) -> file)
                 .build();
 
         final Class<?> byteBuddyAgentClass = Class.forName(Packages.fix(BYTE_BUDDY_AGENT_CLASS), true, classLoader);
@@ -109,7 +109,6 @@ public final class ByteBuddyInstrumentationFactory implements InstrumentationFac
         final Method pidMethod = processHandle.getMethod("pid");
         final Object currentProcess = currentMethod.invoke(processHandle);
         final Long processId = (Long) pidMethod.invoke(currentProcess);
-
 
         attachMethod.invoke(null, relocatedFile, String.valueOf(processId), "");
 

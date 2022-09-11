@@ -39,7 +39,6 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
@@ -81,7 +80,7 @@ public final class ReflectiveJarRelocatorFacadeFactory implements JarRelocatorFa
         return jarRelocatorConstructor.newInstance(input, output, rules);
     }
 
-    private static DependencyData getJarRelocatorDependency(final Collection<Repository> repositories) throws MalformedURLException {
+    private static DependencyData getJarRelocatorDependency(final Collection<Repository> repositories) {
         final Dependency asm = new Dependency(
                 Packages.fix("org#ow2#asm"),
                 "asm",
@@ -99,7 +98,7 @@ public final class ReflectiveJarRelocatorFacadeFactory implements JarRelocatorFa
         final Dependency jarRelocator = new Dependency(
                 Packages.fix("me#lucko"),
                 "jar-relocator",
-                "1.4",
+                "1.5",
                 null,
                 Arrays.asList(asm, asmCommons)
         );
@@ -120,9 +119,9 @@ public final class ReflectiveJarRelocatorFacadeFactory implements JarRelocatorFa
         ApplicationBuilder.injecting("SlimJar", classLoader)
                 .downloadDirectoryPath(downloadPath)
                 .preResolutionDataProviderFactory(a -> Collections::emptyMap)
-                .dataProviderFactory((url) -> () -> ReflectiveJarRelocatorFacadeFactory.getJarRelocatorDependency(repositories))
-                .relocatorFactory((rules) -> new PassthroughRelocator())
-                .relocationHelperFactory((relocator) -> (dependency,file) -> file)
+                .dataProviderFactory(url -> () -> ReflectiveJarRelocatorFacadeFactory.getJarRelocatorDependency(repositories))
+                .relocatorFactory(rules -> new PassthroughRelocator())
+                .relocationHelperFactory(relocator -> (dependency,file) -> file)
                 .build();
         final Class<?> jarRelocatorClass = Class.forName(Packages.fix(JAR_RELOCATOR_PACKAGE), true, classLoader);
         final Class<?> relocationClass = Class.forName(Packages.fix(RELOCATION_PACKAGE), true, classLoader);

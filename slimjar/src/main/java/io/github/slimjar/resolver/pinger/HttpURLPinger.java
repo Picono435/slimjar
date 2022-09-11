@@ -42,9 +42,9 @@ public final class HttpURLPinger implements URLPinger {
     @Override
     public boolean ping(final URL url) {
         final String urlStr = url.toString();
-        LOGGER.debug("Pinging {0}", urlStr);
+        LOGGER.debug("Pinging %s", urlStr);
         if (!isSupported(url)) {
-            LOGGER.debug("Protocol not supported for {0}", url.toString());
+            LOGGER.debug("Protocol not supported for %s", url.toString());
             return false;
         }
         HttpURLConnection connection = null;
@@ -53,10 +53,10 @@ public final class HttpURLPinger implements URLPinger {
             connection.addRequestProperty("User-Agent", SLIMJAR_USER_AGENT);
             connection.connect();
             final boolean result = connection.getResponseCode() == HttpURLConnection.HTTP_OK;
-            LOGGER.debug("Ping {1} for {0}", url.toString(), result ? "successful" : "failed");
+            LOGGER.debug("Ping %s for %s", result ? "successful" : "failed", url.toString());
             return connection.getResponseCode() == HttpURLConnection.HTTP_OK;
         } catch (IOException e) {
-            LOGGER.debug("Ping failed for {0}", url.toString());
+            LOGGER.debug("Ping failed for %s", url.toString());
             return false;
         } finally {
             if (connection != null) {

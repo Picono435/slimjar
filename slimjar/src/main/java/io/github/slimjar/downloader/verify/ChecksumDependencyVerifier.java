@@ -61,23 +61,23 @@ public final class ChecksumDependencyVerifier implements DependencyVerifier {
     @Override
     public boolean verify(final File file, final Dependency dependency) throws IOException {
         if (!file.exists()) return false;
-        LOGGER.log("Verifying checksum for {0}", dependency.getArtifactId());
+        LOGGER.log("Verifying checksum for %s", dependency.artifactId());
         final File checksumFile = outputWriterFactory.getStrategy().selectFileFor(dependency);
         checksumFile.getParentFile().mkdirs();
         if (!checksumFile.exists() && !prepareChecksumFile(checksumFile, dependency)) {
-            LOGGER.log("Unable to resolve checksum for {0}, falling back to fallbackVerifier!", dependency.getArtifactId());
+            LOGGER.log("Unable to resolve checksum for %s, falling back to fallbackVerifier!", dependency.artifactId());
             return fallbackVerifier.verify(file, dependency);
         }
         if (checksumFile.length() == 0L) {
-            LOGGER.log("Required checksum not found for {0}, using fallbackVerifier!", dependency.getArtifactId());
+            LOGGER.log("Required checksum not found for %s, using fallbackVerifier!", dependency.artifactId());
             return fallbackVerifier.verify(file, dependency);
         }
         final String actualChecksum = checksumCalculator.calculate(file);
         final String expectedChecksum = new String(Files.readAllBytes(checksumFile.toPath())).trim();
-        LOGGER.debug("{0} -> Actual checksum: {1};", dependency.getArtifactId(), actualChecksum);
-        LOGGER.debug("{0} -> Expected checksum: {1};", dependency.getArtifactId(), expectedChecksum);
+        LOGGER.debug("%s -> Actual checksum: %s;", dependency.artifactId(), actualChecksum);
+        LOGGER.debug("%s -> Expected checksum: %s;", dependency.artifactId(), expectedChecksum);
         final boolean match = Objects.equals(actualChecksum, expectedChecksum);
-        LOGGER.log("Checksum {0} for {1}", match ? "matched" : "match failed", dependency.getArtifactId());
+        LOGGER.log("Checksum %s for %s", match ? "matched" : "match failed", dependency.artifactId());
         return Objects.equals(actualChecksum, expectedChecksum);
     }
 
@@ -91,22 +91,22 @@ public final class ChecksumDependencyVerifier implements DependencyVerifier {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private boolean prepareChecksumFile(final File checksumFile, final Dependency dependency) throws IOException {
         final Optional<ResolutionResult> result = resolver.resolve(dependency);
-        if (!result.isPresent()) {
-            return false;
-        } else {
-            final URL checkSumUrl = result.get().getChecksumURL();
-            LOGGER.log("Resolved checksum URL for {0} as {1}", dependency.getArtifactId(), checkSumUrl);
-            if (checkSumUrl == null) {
-                checksumFile.createNewFile();
-                return true;
-            }
-            final URLConnection connection = Connections.createDownloadConnection(checkSumUrl);
-            final InputStream inputStream = connection.getInputStream();
-            final OutputWriter outputWriter = outputWriterFactory.create(dependency);
-            outputWriter.writeFrom(inputStream, connection.getContentLength());
-            Connections.tryDisconnect(connection);
-            LOGGER.log("Downloaded checksum for {0}", dependency.getArtifactId());
+
+        if (result.isEmpty()) return false;
+
+        final URL checkSumUrl = result.get().getChecksumURL();
+        LOGGER.log("Resolved checksum URL for %s as %s", dependency.artifactId(), checkSumUrl);
+        if (checkSumUrl == null) {
+            checksumFile.createNewFile();
+            return true;
         }
+        final URLConnection connection = Connections.createDownloadConnection(checkSumUrl);
+        final InputStream inputStream = connection.getInputStream();
+        final OutputWriter outputWriter = outputWriterFactory.create(dependency);
+        outputWriter.writeFrom(inputStream, connection.getContentLength());
+        Connections.tryDisconnect(connection);
+        LOGGER.log("Downloaded checksum for %s", dependency.artifactId());
+
         return true;
     }
 }

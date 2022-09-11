@@ -28,56 +28,65 @@ import io.github.slimjar.resolver.data.Dependency;
 import io.github.slimjar.resolver.data.Repository;
 import io.github.slimjar.resolver.pinger.URLPinger;
 import io.github.slimjar.resolver.strategy.MavenChecksumPathResolutionStrategy;
-import io.github.slimjar.resolver.strategy.MavenPomPathResolutionStrategy;
 import io.github.slimjar.resolver.strategy.PathResolutionStrategy;
-import junit.framework.TestCase;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
 import java.net.URL;
 import java.util.Collections;
+import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.mockito.Mockito;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({URL.class, PingingRepositoryEnquirer.class, URLPinger.class})
-public class RepositoryEnquirerTest extends TestCase {
-    public void testPingingEnquirerProvideValidURL() throws Exception {
-        final URL mockUrl = PowerMockito.mock(URL.class);
+public class RepositoryEnquirerTest {
 
-        final PathResolutionStrategy resolutionStrategy = PowerMockito.mock(PathResolutionStrategy.class);
-        final URLPinger pinger = PowerMockito.mock(URLPinger.class);
-
-        PowerMockito.whenNew(URL.class).withAnyArguments().thenReturn(mockUrl);
-        PowerMockito.doReturn(Collections.singleton("https://a.b.c/repo/dep.jar")).when(resolutionStrategy).pathTo(new Repository(mockUrl), new Dependency("a.b.c","d","", null, Collections.emptySet()));
-        PowerMockito.doReturn(true).when(pinger).ping(mockUrl);
-
-        final RepositoryEnquirer repositoryEnquirer = new PingingRepositoryEnquirer(new Repository(mockUrl), resolutionStrategy, new MavenChecksumPathResolutionStrategy("SHA-256", resolutionStrategy), new MavenPomPathResolutionStrategy(), pinger);
-        assertNotNull("Valid repo & dep should return non-null URL", repositoryEnquirer.enquire(new Dependency("a.b.c","d","", null, Collections.emptySet())));
+    @AfterEach
+    public void tearDown() {
+        Mockito.clearAllCaches();
     }
 
-    public void testPingingEnquirerProvideInvalidURL() throws Exception {
-        final URL mockUrl = PowerMockito.mock(URL.class);
-        final PathResolutionStrategy resolutionStrategy = PowerMockito.mock(PathResolutionStrategy.class);
-        final URLPinger pinger = PowerMockito.mock(URLPinger.class);
+    @Test
+    public void testPingingEnquirerProvideValidURL() {
+        final var pinger = Mockito.mock(URLPinger.class, defaultAnswer -> true);
+        final var resolutionStrategy = Mockito.mock(PathResolutionStrategy.class, defaultAnswer -> Collections.singleton("https://a.b.c/repo/dep.jar"));
 
-        PowerMockito.whenNew(URL.class).withAnyArguments().thenReturn(mockUrl);
-        PowerMockito.doReturn(Collections.singleton("https://a.b.c/repo/dep.jar")).when(resolutionStrategy).pathTo(null, null);
-        PowerMockito.doReturn(false).when(pinger).ping(mockUrl);
+        final RepositoryEnquirer repositoryEnquirer = new PingingRepositoryEnquirer(
+            new Repository(Mockito.mock(URL.class)),
+            resolutionStrategy,
+            new MavenChecksumPathResolutionStrategy("SHA-256", resolutionStrategy),
+            resolutionStrategy,
+            pinger
+        );
 
-        final RepositoryEnquirer repositoryEnquirer = new PingingRepositoryEnquirer(null, resolutionStrategy, resolutionStrategy, resolutionStrategy, pinger);
-        assertNull("Invalid repo or dep should return null URL", repositoryEnquirer.enquire(new Dependency("", "", "", null, Collections.emptySet())));
+        Assertions.assertNotNull(repositoryEnquirer.enquire(new Dependency("a.b.c","d","", null, Collections.emptySet())), "Valid repo & dep should return non-null URL");
     }
 
-    public void testPingingEnquirerProvideMalformedURL() throws Exception {
-        final URL url = PowerMockito.mock(URL.class);
-        final Repository repository = new Repository(url);
-        final PathResolutionStrategy resolutionStrategy = PowerMockito.mock(PathResolutionStrategy.class);
-        final URLPinger pinger = PowerMockito.mock(URLPinger.class);
+    @Test
+    public void testPingingEnquirerProvideInvalidURL() {
+        final var mockURL = Mockito.mock(URL.class);
+        final var mockPinger = Mockito.mock(URLPinger.class);
+        final var resolutionStrategy = Mockito.mock(PathResolutionStrategy.class);
 
-        PowerMockito.doReturn(Collections.singleton("some_malformed_url")).when(resolutionStrategy).pathTo(repository, null);
+        Mockito.doReturn(Collections.singleton("https://a.b.c/repo/dep.jar"))
+            .when(resolutionStrategy)
+            .pathTo(null, null);
 
-        final RepositoryEnquirer repositoryEnquirer = new PingingRepositoryEnquirer(repository, resolutionStrategy, resolutionStrategy, resolutionStrategy, pinger);
-        assertNull("Malformed URL should return null URL", repositoryEnquirer.enquire(new Dependency("", "", "", null, Collections.emptySet())));
+        Mockito.doReturn(false).when(mockPinger).ping(mockURL);
+
+        final RepositoryEnquirer repositoryEnquirer = new PingingRepositoryEnquirer(null, resolutionStrategy, resolutionStrategy, resolutionStrategy, mockPinger);
+        Assertions.assertNull(repositoryEnquirer.enquire(new Dependency("", "", "", null, Collections.emptySet())), "Invalid repo or dep should return null URL");
+
+//        mockConst.close();
+    }
+
+    @Test
+    public void testPingingEnquirerProvideMalformedURL() {
+        final var mockURL = Mockito.mock(URL.class);
+        final var mockPinger = Mockito.mock(URLPinger.class);
+        final var resolutionStrategy = Mockito.mock(PathResolutionStrategy.class);
+        final var repository = new Repository(mockURL);
+
+        Mockito.doReturn(Collections.singleton("some_malformed_url")).when(resolutionStrategy).pathTo(repository, null);
+
+        final RepositoryEnquirer repositoryEnquirer = new PingingRepositoryEnquirer(repository, resolutionStrategy, resolutionStrategy, resolutionStrategy, mockPinger);
+        Assertions.assertNull(repositoryEnquirer.enquire(new Dependency("", "", "", null, Collections.emptySet())), "Malformed URL should return null URL");
     }
 }

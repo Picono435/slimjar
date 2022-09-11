@@ -29,6 +29,7 @@ import io.github.slimjar.resolver.data.DependencyData;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.JarURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
@@ -46,13 +47,13 @@ public final class ModuleDependencyDataProvider implements DependencyDataProvide
 
     @Override
     public DependencyData get() throws IOException, ReflectiveOperationException {
-        final URL depFileURL = new URL("jar:file:" +moduleUrl.getFile() +"!/slimjar.json");
+        final URL depFileURL = getURL();
 
         final URLConnection connection = depFileURL.openConnection();
-        if (!(connection instanceof JarURLConnection)) {
+        if (!(connection instanceof final JarURLConnection jarURLConnection)) {
             throw new AssertionError("Invalid Module URL provided(Non-Jar File)");
         }
-        final JarURLConnection jarURLConnection = (JarURLConnection) connection;
+
         final JarFile jarFile = jarURLConnection.getJarFile();
         final ZipEntry dependencyFileEntry = jarFile.getEntry("slimjar.json");
         if (dependencyFileEntry == null) {
@@ -67,5 +68,10 @@ public final class ModuleDependencyDataProvider implements DependencyDataProvide
         try (InputStream inputStream = jarFile.getInputStream(dependencyFileEntry)){
             return dependencyReader.read(inputStream);
         }
+    }
+
+    /** Public for tests. */
+    public URL getURL() throws MalformedURLException {
+        return new URL("jar:file:" +moduleUrl.getFile() +"!/slimjar.json");
     }
 }

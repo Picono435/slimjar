@@ -34,57 +34,49 @@ import io.github.slimjar.resolver.pinger.URLPinger;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Optional;
 
-public final class PingingRepositoryEnquirer implements RepositoryEnquirer {
+public record PingingRepositoryEnquirer(
+    Repository repository,
+    PathResolutionStrategy dependencyURLCreationStrategy,
+    PathResolutionStrategy checksumURLCreationStrategy,
+    PathResolutionStrategy pomURLCreationStrategy,
+    URLPinger urlPinger
+
+) implements RepositoryEnquirer {
     private static final ProcessLogger LOGGER = LogDispatcher.getMediatingLogger();
-    private final Repository repository;
-    private final PathResolutionStrategy dependencyURLCreationStrategy;
-    private final PathResolutionStrategy checksumURLCreationStrategy;
-    private final PathResolutionStrategy pomURLCreationStrategy;
-    private final URLPinger urlPinger;
-
-    public PingingRepositoryEnquirer(final Repository repository, final PathResolutionStrategy urlCreationStrategy, final PathResolutionStrategy checksumURLCreationStrategy, final PathResolutionStrategy pomURLCreationStrategy, final URLPinger urlPinger) {
-        this.repository = repository;
-        this.dependencyURLCreationStrategy = urlCreationStrategy;
-        this.checksumURLCreationStrategy = checksumURLCreationStrategy;
-        this.pomURLCreationStrategy = pomURLCreationStrategy;
-        this.urlPinger = urlPinger;
-    }
 
     @Override
     public ResolutionResult enquire(final Dependency dependency) {
-        LOGGER.debug("Enquiring repositories to find {0}", dependency.getArtifactId());
-        final Optional<URL> resolvedDependency = dependencyURLCreationStrategy.pathTo(repository, dependency)
-                .stream().map((path) -> {
-                    try {
-                        return new URL(path);
-                    } catch (MalformedURLException e) {
-                        return null;
-                    }
-                }).filter(urlPinger::ping)
-                .findFirst();
-        if (!resolvedDependency.isPresent()) {
-            return pomURLCreationStrategy.pathTo(repository, dependency).stream().map((path) -> {
-                try {
-                    return new URL(path);
-                } catch (MalformedURLException e) {
-                    return null;
-                }
-            }).filter(urlPinger::ping)
-                    .findFirst()
-                    .map(url -> new ResolutionResult(repository, null, null, true))
-                    .orElse(null);
+        LOGGER.debug("Enquiring repositories to find %s", dependency.artifactId());
+
+        return dependencyURLCreationStrategy.pathTo(repository, dependency)
+                .stream()
+                .map(this::createURL)
+                .filter(urlPinger::ping)
+                .findFirst()
+                .map(url -> {
+                    final var resolvedChecksum = checksumURLCreationStrategy.pathTo(repository, dependency)
+                            .parallelStream()
+                            .map(this::createURL)
+                            .filter(urlPinger::ping)
+                            .findFirst()
+                            .orElse(null);
+                    return new ResolutionResult(repository, url, resolvedChecksum, false, true);
+                }).orElseGet(() -> pomURLCreationStrategy.pathTo(repository, dependency).parallelStream()
+                        .map(this::createURL)
+                        .filter(urlPinger::ping)
+                        .findFirst()
+                        .map(url -> new ResolutionResult(repository, null, null, true, false))
+                        .orElse(null)
+        );
+    }
+
+    private URL createURL(final String path) {
+        try {
+            return new URL(path);
+        } catch (final MalformedURLException e) {
+            LOGGER.debug("Failed to create URL from path %s", path);
+            return null;
         }
-        final Optional<URL> resolvedChecksum = checksumURLCreationStrategy.pathTo(repository, dependency)
-                .stream().map((path) -> {
-                    try {
-                        return new URL(path);
-                    } catch (MalformedURLException e) {
-                        return null;
-                    }
-                }).filter(urlPinger::ping)
-                .findFirst();
-        return new ResolutionResult(repository, resolvedDependency.get(), resolvedChecksum.orElse(null), false);
     }
 }

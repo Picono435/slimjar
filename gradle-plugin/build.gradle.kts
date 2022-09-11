@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "io.github.slimjar"
-version = "1.3.0"
+version = "1.3.1"
 
 repositories {
     maven("https://plugins.gradle.org/m2/")
@@ -104,7 +104,7 @@ tasks.named("check") {
 tasks {
     withType<KotlinCompile> {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "17"
             freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
         }
     }
@@ -113,9 +113,11 @@ tasks {
         mapOf(
             "io.github.slimjar" to "",
             "me.lucko.jarrelocator" to ".jarrelocator",
-            "com.google.gson" to ".gson"
+            "com.google.gson" to ".gson",
+            "kotlin" to ".kotlin",
+            "org.intellij" to ".intellij",
+            "org.jetbrains" to ".jetbrains"
         ).forEach { relocate(it.key, "io.github.slimjar${it.value}") }
-        relocate("kotlin", "kotlin")
     }
 
     test {

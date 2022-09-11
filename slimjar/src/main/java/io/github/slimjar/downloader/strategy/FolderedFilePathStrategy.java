@@ -44,15 +44,15 @@ public final class FolderedFilePathStrategy implements FilePathStrategy {
 
     @Override
     public File selectFileFor(Dependency dependency) {
-        final String extendedVersion = Optional.ofNullable(dependency.getSnapshotId()).map(s -> "-" + s).orElse("");
+        final String extendedVersion = Optional.ofNullable(dependency.snapshotId()).map(s -> "-" + s).orElse("");
         final String path = String.format(
                 DEPENDENCY_FILE_FORMAT,
                 rootDirectory.getPath(),
-                dependency.getGroupId().replace('.','/'),
-                dependency.getArtifactId(),
-                dependency.getVersion() + extendedVersion
+                dependency.groupId().replace('.','/'),
+                dependency.artifactId(),
+                dependency.version() + extendedVersion
         );
-        LOGGER.log(Level.FINEST, "Selected jar file for " + dependency.getArtifactId() + " at " + path);
+        LOGGER.log(Level.FINEST, "Selected jar file for " + dependency.artifactId() + " at " + path);
         return new File(path);
     }
 

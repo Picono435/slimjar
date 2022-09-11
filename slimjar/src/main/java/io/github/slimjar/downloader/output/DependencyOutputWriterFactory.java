@@ -41,7 +41,7 @@ public final class DependencyOutputWriterFactory implements OutputWriterFactory 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
     public OutputWriter create(final Dependency dependency) {
-        LOGGER.log(Level.FINEST, "Creating OutputWriter for {0}", dependency.getArtifactId());
+        LOGGER.log(Level.FINEST, "Creating OutputWriter for {0}", dependency.artifactId());
         final File outputFile = outputFilePathStrategy.selectFileFor(dependency);
         outputFile.getParentFile().mkdirs();
         return new ChanneledFileOutputWriter(outputFile);

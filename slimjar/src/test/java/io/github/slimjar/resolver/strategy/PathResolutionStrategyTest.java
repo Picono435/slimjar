@@ -33,9 +33,12 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class PathResolutionStrategyTest extends TestCase {
+public class PathResolutionStrategyTest {
 
+    @Test
     public void testPathResolutionStrategyMaven() throws MalformedURLException {
         final String repoString = "https://repo.tld/";
         final Repository repository = new Repository(new URL(repoString));
@@ -43,7 +46,7 @@ public class PathResolutionStrategyTest extends TestCase {
         final PathResolutionStrategy pathResolutionStrategy = new MavenPathResolutionStrategy();
         final Collection<String> resolvedPath = pathResolutionStrategy.pathTo(repository, dependency);
 
-        assertEquals("Maven Path Resolution (LOCAL)", new HashSet<>(resolvedPath), new HashSet<>(Collections.singleton("https://repo.tld/a/b/c/d/1.0/d-1.0.jar")));
+        Assertions.assertEquals(new HashSet<>(resolvedPath), new HashSet<>(Collections.singleton("https://repo.tld/a/b/c/d/1.0/d-1.0.jar")), "Maven Path Resolution (LOCAL)");
     }
 
 }

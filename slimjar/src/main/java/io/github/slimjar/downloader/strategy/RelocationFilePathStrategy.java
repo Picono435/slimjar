@@ -45,16 +45,16 @@ public final class RelocationFilePathStrategy implements FilePathStrategy {
 
     @Override
     public File selectFileFor(final Dependency dependency) {
-        final String extendedVersion = Optional.ofNullable(dependency.getSnapshotId()).map(s -> "-" + s).orElse("");
+        final String extendedVersion = Optional.ofNullable(dependency.snapshotId()).map(s -> "-" + s).orElse("");
         final String path = String.format(
                 DEPENDENCY_FILE_FORMAT,
                 rootDirectory.getPath(),
-                dependency.getGroupId().replace('.','/'),
-                dependency.getArtifactId(),
-                dependency.getVersion() + extendedVersion,
+                dependency.groupId().replace('.','/'),
+                dependency.artifactId(),
+                dependency.version() + extendedVersion,
                 applicationName
         );
-        LOGGER.log(Level.FINEST, "Selected file for relocated " + dependency.getArtifactId() + " at " + path);
+        LOGGER.log(Level.FINEST, "Selected file for relocated " + dependency.artifactId() + " at " + path);
         return new File(path);
     }
 

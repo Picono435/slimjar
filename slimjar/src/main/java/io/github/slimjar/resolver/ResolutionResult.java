@@ -34,12 +34,21 @@ public final class ResolutionResult {
     private final URL dependencyURL;
     private final URL checksumURL;
     private final boolean isAggregator;
+    private boolean checked;
 
-    public ResolutionResult(final Repository repository, final URL dependencyURL, final URL checksumURL, final boolean isAggregator) {
+    public ResolutionResult(
+            final Repository repository,
+            final URL dependencyURL,
+            final URL checksumURL,
+            final boolean isAggregator,
+            final boolean checked
+    ) {
         this.repository = repository;
         this.dependencyURL = dependencyURL;
         this.checksumURL = checksumURL;
         this.isAggregator = isAggregator;
+        this.checked = checked;
+
         if (!isAggregator) {
             Objects.requireNonNull(dependencyURL, "Resolved URL must not be null for non-aggregator dependencies");
         }
@@ -61,6 +70,14 @@ public final class ResolutionResult {
         return isAggregator;
     }
 
+    public boolean isChecked() {
+        return checked;
+    }
+
+    public void setChecked() {
+        this.checked = true;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -68,12 +85,13 @@ public final class ResolutionResult {
         ResolutionResult that = (ResolutionResult) o;
         // String comparison to avoid all blocking calls
         return dependencyURL.toString().equals(that.toString()) &&
-                Objects.equals(checksumURL.toString(), that.getChecksumURL().toString()) &&
-                isAggregator == that.isAggregator;
+                Objects.equals(checksumURL.toString(), that.checksumURL.toString()) &&
+                isAggregator == that.isAggregator &&
+                checked == that.checked;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dependencyURL.toString(), checksumURL.toString(), isAggregator);
+        return Objects.hash(dependencyURL.toString(), checksumURL.toString(), isAggregator, checked);
     }
 }

@@ -49,7 +49,7 @@ public final class SimpleDependencyInjector implements DependencyInjector {
     @Override
     public void inject(final Injectable injectable, final DependencyData data, final Map<String, ResolutionResult> preResolvedResults) throws ReflectiveOperationException, NoSuchAlgorithmException, IOException, URISyntaxException {
         final InjectionHelper helper = injectionHelperFactory.create(data, preResolvedResults);
-        injectDependencies(injectable, helper, data.getDependencies());
+        injectDependencies(injectable, helper, data.dependencies());
     }
 
     private void injectDependencies(final Injectable injectable, final InjectionHelper injectionHelper, final Collection<Dependency> dependencies) throws ReflectiveOperationException {
@@ -60,7 +60,7 @@ public final class SimpleDependencyInjector implements DependencyInjector {
                     continue;
                 }
                 injectable.inject(depJar.toURI().toURL());
-                injectDependencies(injectable, injectionHelper, dependency.getTransitive());
+                injectDependencies(injectable, injectionHelper, dependency.transitive());
             } catch (final IOException e) {
                 throw new InjectionFailedException(dependency, e);
             } catch (IllegalAccessException | InvocationTargetException | URISyntaxException e) {

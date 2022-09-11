@@ -26,29 +26,25 @@ package io.github.slimjar.resolver.reader.provider;
 
 import io.github.slimjar.resolver.data.Repository;
 import io.github.slimjar.resolver.mirrors.SimpleMirrorSelector;
-import io.github.slimjar.resolver.reader.*;
+import io.github.slimjar.resolver.reader.MockDependencyData;
 import io.github.slimjar.resolver.reader.dependency.DependencyDataProvider;
 import io.github.slimjar.resolver.reader.dependency.DependencyReader;
 import io.github.slimjar.resolver.reader.dependency.GsonDependencyReader;
 import io.github.slimjar.resolver.reader.dependency.URLDependencyDataProvider;
 import io.github.slimjar.resolver.reader.facade.ReflectiveGsonFacadeFactory;
-import junit.framework.TestCase;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
+import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.mockito.Mockito;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({URL.class, URLDependencyDataProvider.class})
-public class URLDependencyDataProviderTest extends TestCase {
+public class URLDependencyDataProviderTest {
     private static final Path DEFAULT_DOWNLOAD_DIRECTORY;
     private static final Collection<Repository> CENTRAL_MIRRORS;
 
@@ -64,38 +60,47 @@ public class URLDependencyDataProviderTest extends TestCase {
         DEFAULT_DOWNLOAD_DIRECTORY = file.toPath();
     }
 
+    @Test
     public void testFileDependencyDataProvider() throws Exception {
-        final MockDependencyData mockDependencyData = new MockDependencyData();
-        final URL mockUrl = PowerMockito.mock(URL.class);
-        PowerMockito.whenNew(URL.class).withParameterTypes(String.class).withArguments("MyURLString").thenReturn(mockUrl);
-        PowerMockito.when(mockUrl.openStream()).thenReturn(mockDependencyData.getDependencyDataInputStream());
-        final DependencyDataProvider dependencyDataProvider = new URLDependencyDataProvider(new GsonDependencyReader(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS).createFacade()), mockUrl);
-        assertEquals("Read and provide proper dependencies",mockDependencyData.getExpectedSample(), dependencyDataProvider.get());
+        final var mockDependencyData = new MockDependencyData();
+        final var mockURL = Mockito.mock(URL.class);
+        final var mockConnection = Mockito.mock(URLConnection.class);
+
+        Mockito.when(mockURL.openConnection()).thenReturn(mockConnection);
+        Mockito.when(mockConnection.getInputStream()).thenReturn(mockDependencyData.getDependencyDataInputStream());
+
+        final DependencyDataProvider dependencyDataProvider = new URLDependencyDataProvider(new GsonDependencyReader(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS).createFacade()), mockURL);
+        Assertions.assertEquals(mockDependencyData.getExpectedSample(), dependencyDataProvider.get(), "Read and provide proper dependencies");
     }
 
+    @Test
     public void testFileDependencyDataProviderReturnReader() throws Exception {
-        final MockDependencyData mockDependencyData = new MockDependencyData();
-        final URL mockUrl = PowerMockito.mock(URL.class);
-        PowerMockito.whenNew(URL.class).withParameterTypes(String.class).withArguments("MyURLString").thenReturn(mockUrl);
-        PowerMockito.when(mockUrl.openStream()).thenReturn(mockDependencyData.getDependencyDataInputStream());
+        final var mockDependencyData = new MockDependencyData();
+        final var mockURL = Mockito.mock(URL.class);
+
+        Mockito.when(mockURL.openStream()).thenReturn(mockDependencyData.getDependencyDataInputStream());
+
         final DependencyReader dependencyReader = new GsonDependencyReader(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS).createFacade());
-        final URLDependencyDataProvider dependencyDataProvider = new URLDependencyDataProvider(dependencyReader, mockUrl);
-        assertEquals("Provider must use given reader", dependencyReader, dependencyDataProvider.getDependencyReader());
+        final URLDependencyDataProvider dependencyDataProvider = new URLDependencyDataProvider(dependencyReader, mockURL);
+        Assertions.assertEquals(dependencyReader, dependencyDataProvider.getDependencyReader(), "Provider must use given reader");
     }
 
+    @Test
     public void testFileDependencyDataProviderOnUrlException() throws Exception {
-        final URL mockUrl = PowerMockito.mock(URL.class);
-        final DependencyReader mockReader = PowerMockito.mock(DependencyReader.class);
-        PowerMockito.whenNew(URL.class).withParameterTypes(String.class).withArguments("MyURLString").thenReturn(mockUrl);
+        final var mockURL = Mockito.mock(URL.class);
+        final var mockReader = Mockito.mock(DependencyReader.class);
+        final var mockConnection = Mockito.mock(URLConnection.class);
         final Exception expectedException = new IOException();
-        PowerMockito.when(mockUrl.openStream()).thenThrow(expectedException);
+
+        Mockito.when(mockURL.openConnection()).thenReturn(mockConnection);
+        Mockito.when(mockConnection.getInputStream()).thenThrow(expectedException);
+
         Exception exception = null;
         try {
-            new URLDependencyDataProvider(mockReader, mockUrl).get();
+            new URLDependencyDataProvider(mockReader, mockURL).get();
         } catch (final Exception ex) {
             exception = ex;
         }
-        assertSame("Provider must elevate exception on url issue", expectedException, exception);
-
+        Assertions.assertSame(expectedException, exception, "Provider must elevate exception on url issue");
     }
 }

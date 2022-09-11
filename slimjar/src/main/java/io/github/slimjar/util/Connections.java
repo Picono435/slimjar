@@ -39,8 +39,7 @@ public final class Connections {
 
     public static URLConnection createDownloadConnection(final URL url) throws IOException {
         final URLConnection connection =  url.openConnection();
-        if (connection instanceof HttpURLConnection) {
-            final HttpURLConnection httpConnection = (HttpURLConnection) connection;
+        if (connection instanceof HttpURLConnection httpConnection) {
             connection.addRequestProperty("User-Agent", SLIMJAR_USER_AGENT);
             final int responseCode = httpConnection.getResponseCode();
 
@@ -51,8 +50,8 @@ public final class Connections {
         return connection;
     }
     public static void tryDisconnect(final URLConnection urlConnection) {
-        if (urlConnection instanceof HttpURLConnection) {
-            ((HttpURLConnection) urlConnection).disconnect();
+        if (urlConnection instanceof HttpURLConnection httpURLConnection) {
+            httpURLConnection.disconnect();
         }
     }
 }

@@ -28,7 +28,6 @@ import io.github.slimjar.resolver.data.Repository;
 import io.github.slimjar.resolver.mirrors.SimpleMirrorSelector;
 import io.github.slimjar.resolver.reader.dependency.*;
 import io.github.slimjar.resolver.reader.facade.ReflectiveGsonFacadeFactory;
-import junit.framework.TestCase;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,8 +38,10 @@ import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Collections;
+import org.junit.jupiter.api.Assertions;
+import org.junit.Test;
 
-public class DependencyDataProviderFactoryTest extends TestCase {
+public class DependencyDataProviderFactoryTest {
     private static final Path DEFAULT_DOWNLOAD_DIRECTORY;
     private static final Collection<Repository> CENTRAL_MIRRORS;
 
@@ -55,29 +56,31 @@ public class DependencyDataProviderFactoryTest extends TestCase {
         DEFAULT_DOWNLOAD_DIRECTORY = new File(defaultPath).toPath();
     }
 
-
+    @Test
     public void testCreateFactory() throws IOException, URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException {
         final URL url = new URL("https://a.b.c");
         final DependencyDataProviderFactory dependencyDataProviderFactory = new GsonDependencyDataProviderFactory(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS));
         final DependencyDataProvider provider = dependencyDataProviderFactory.create(url);
 
-        assertTrue("create must return a FileDependencyDataProvider", provider instanceof URLDependencyDataProvider);
+        Assertions.assertTrue(provider instanceof URLDependencyDataProvider, "create must return a FileDependencyDataProvider");
     }
 
+    @Test
     public void testCreateFileDataProviderFactory() throws IOException, URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException {
         final URL url = new URL("https://a.b.c");
         final DependencyDataProviderFactory dependencyDataProviderFactory = new GsonDependencyDataProviderFactory(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS));
         final DependencyDataProvider provider = dependencyDataProviderFactory.create(url);
 
-        assertTrue("forFile must return a FileDependencyDataProvider", provider instanceof URLDependencyDataProvider);
+        Assertions.assertTrue(provider instanceof URLDependencyDataProvider, "forFile must return a FileDependencyDataProvider");
     }
 
+    @Test
     public void testCreateModuleDataProviderFactory() throws IOException, URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException {
         final URL url = new URL("https://a.b.c");
 
         final DependencyDataProviderFactory dependencyDataProviderFactory = new ExternalDependencyDataProviderFactory(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS));
         final DependencyDataProvider provider = dependencyDataProviderFactory.create(url);
 
-        assertTrue("forFile must return a FileDependencyDataProvider", provider instanceof ModuleDependencyDataProvider);
+        Assertions.assertTrue(provider instanceof ModuleDependencyDataProvider, "forFile must return a FileDependencyDataProvider");
     }
 }

@@ -33,7 +33,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class Modules {
@@ -65,7 +64,7 @@ public final class Modules {
         try (Stream<Path> stream = Files.walk(resourcesPath, 1)) {
             return stream.filter(path -> path.endsWith(".isolated-jar"))
                     .map(path -> path.getFileName().toString())
-                    .collect(Collectors.toList());
+                    .toList();
         }
     }
 }

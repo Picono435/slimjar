@@ -32,14 +32,13 @@ import io.github.slimjar.resolver.reader.dependency.GsonDependencyReader;
 import io.github.slimjar.resolver.reader.MockDependencyData;
 import io.github.slimjar.resolver.reader.dependency.ModuleDependencyDataProvider;
 import io.github.slimjar.resolver.reader.facade.ReflectiveGsonFacadeFactory;
-import junit.framework.TestCase;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
+import org.junit.Test;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
@@ -49,11 +48,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
+import org.junit.jupiter.api.Assertions;
+import org.mockito.Mockito;
 
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({URL.class, ModuleDependencyDataProviderTest.class, ModuleDependencyDataProvider.class})
-public class ModuleDependencyDataProviderTest extends TestCase {
+public class ModuleDependencyDataProviderTest {
     private static final Path DEFAULT_DOWNLOAD_DIRECTORY;
     private static final Collection<Repository> CENTRAL_MIRRORS;
 
@@ -68,61 +67,76 @@ public class ModuleDependencyDataProviderTest extends TestCase {
         DEFAULT_DOWNLOAD_DIRECTORY = new File(defaultPath).toPath();
     }
 
+    @Test
     public void testModuleDependencyDataProviderNonEmpty() throws Exception {
-        final MockDependencyData mockDependencyData = new MockDependencyData();
-        final URL mockUrl = PowerMockito.mock(URL.class);
-        final JarURLConnection jarURLConnection = PowerMockito.mock(JarURLConnection.class);
-        final JarFile jarFile = PowerMockito.mock(JarFile.class);
-        final ZipEntry zipEntry = PowerMockito.mock(ZipEntry.class);
-        final InputStream inputStream = mockDependencyData.getDependencyDataInputStream();
-        PowerMockito.whenNew(URL.class).withAnyArguments().thenReturn(mockUrl);
-        PowerMockito.when(mockUrl.openConnection()).thenReturn(jarURLConnection);
-        PowerMockito.when(jarURLConnection.getJarFile()).thenReturn(jarFile);
-        PowerMockito.when(jarFile.getEntry("slimjar.json")).thenReturn(zipEntry);
-        PowerMockito.when(jarFile.getInputStream(zipEntry)).thenReturn(inputStream);
-        final DependencyDataProvider dependencyDataProvider = new ModuleDependencyDataProvider(new GsonDependencyReader(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS).createFacade()), mockUrl);
-        assertEquals("Read and provide proper dependencies", mockDependencyData.getExpectedSample(), dependencyDataProvider.get());
+        final var mockDependencyData = new MockDependencyData();
+        final var mockURL = Mockito.mock(URL.class);
+        final var zipEntry = Mockito.mock(ZipEntry.class);
+        final var inputStream = mockDependencyData.getDependencyDataInputStream();
+
+        final var jarURLConnection = createJarConnection(zipEntry, inputStream);
+        final var mockProvider = createProvider(mockURL, jarURLConnection);
+
+        Assertions.assertEquals(mockDependencyData.getExpectedSample(), mockProvider.get(), "Read and provide proper dependencies");
     }
 
+    @Test
     public void testModuleDependencyDataProviderEmpty() throws Exception {
-        final MockDependencyData mockDependencyData = new MockDependencyData();
-        final URL mockUrl = PowerMockito.mock(URL.class);
-        final JarURLConnection jarURLConnection = PowerMockito.mock(JarURLConnection.class);
-        final JarFile jarFile = PowerMockito.mock(JarFile.class);
-        final DependencyData emptyDependency = new DependencyData(
+        final var mockUrl = Mockito.mock(URL.class);
+        final var jarURLConnection = createJarConnection(null, null);
+        final var emptyDependency = new DependencyData(
                 Collections.emptySet(),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 Collections.emptySet()
         );
-        PowerMockito.whenNew(URL.class).withAnyArguments().thenReturn(mockUrl);
-        PowerMockito.when(mockUrl.openConnection()).thenReturn(jarURLConnection);
-        PowerMockito.when(jarURLConnection.getJarFile()).thenReturn(jarFile);
-        PowerMockito.when(jarFile.getEntry("slimjar.json")).thenReturn(null);
-        final DependencyDataProvider dependencyDataProvider = new ModuleDependencyDataProvider(new GsonDependencyReader(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS).createFacade()), mockUrl);
-        assertEquals("Empty dependency if not exists", emptyDependency, dependencyDataProvider.get());
+
+        final DependencyDataProvider dependencyDataProvider = createProvider(mockUrl, jarURLConnection);
+        Assertions.assertEquals(emptyDependency, dependencyDataProvider.get(), "Empty dependency if not exists");
     }
 
+    @Test
     public void testModuleDependencyDataProviderExceptionIfNonJar() throws Exception {
-        final MockDependencyData mockDependencyData = new MockDependencyData();
-        final URL mockUrl = PowerMockito.mock(URL.class);
-        final HttpURLConnection urlConnection = PowerMockito.mock(HttpURLConnection.class);
-        final JarFile jarFile = PowerMockito.mock(JarFile.class);
-        final DependencyData emptyDependency = new DependencyData(
-                Collections.emptySet(),
-                Collections.emptySet(),
-                Collections.emptySet(),
-                Collections.emptySet()
-        );
-        PowerMockito.whenNew(URL.class).withAnyArguments().thenReturn(mockUrl);
-        PowerMockito.when(mockUrl.openConnection()).thenReturn(urlConnection);
-        final DependencyDataProvider dependencyDataProvider = new ModuleDependencyDataProvider(new GsonDependencyReader(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS).createFacade()), mockUrl);
+        final var mockUrl = Mockito.mock(URL.class);
+        final var urlConnection = Mockito.mock(HttpURLConnection.class);
+        final DependencyDataProvider dependencyDataProvider = createProvider(mockUrl, urlConnection);
+
+        Mockito.doReturn(urlConnection).when(mockUrl).openConnection();
+
         Error error = null;
         try {
             dependencyDataProvider.get();
         } catch (Error thrown) {
             error = thrown;
         }
-        assertTrue("Non-Jar urlcorrection should throw AssertionError", error instanceof AssertionError);
+        Assertions.assertTrue(error instanceof AssertionError, "Non-Jar urlcorrection should throw AssertionError");
+
+    }
+
+    private ModuleDependencyDataProvider createProvider(
+        final URL url,
+        final Object jarURLConnection
+    ) throws IOException, ReflectiveOperationException, NoSuchAlgorithmException, URISyntaxException {
+        final var mockProvider = Mockito.mock(ModuleDependencyDataProvider.class, Mockito.withSettings().useConstructor(new GsonDependencyReader(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS).createFacade()), url));
+
+        Mockito.doReturn(url).when(mockProvider).getURL();
+        Mockito.doCallRealMethod().when(mockProvider).get();
+        Mockito.doReturn(jarURLConnection).when(url).openConnection();
+
+        return mockProvider;
+    }
+
+    private JarURLConnection createJarConnection(
+        final ZipEntry zipEntry,
+        final InputStream inputStream
+    ) throws IOException {
+        final var jarURLConnection = Mockito.mock(JarURLConnection.class);
+        final var jarFile = Mockito.mock(JarFile.class);
+
+        Mockito.doReturn(jarFile).when(jarURLConnection).getJarFile();
+        Mockito.doReturn(zipEntry).when(jarFile).getEntry("slimjar.json");
+        Mockito.doReturn(inputStream).when(jarFile).getInputStream(zipEntry);
+
+        return jarURLConnection;
     }
 }

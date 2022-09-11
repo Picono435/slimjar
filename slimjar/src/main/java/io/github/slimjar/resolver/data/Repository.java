@@ -24,7 +24,7 @@
 
 package io.github.slimjar.resolver.data;
 
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Objects;
 
@@ -32,13 +32,13 @@ public final class Repository {
     public static final String CENTRAL_URL = "https://repo1.maven.org/maven2/";
 
     private static Repository centralInstance;
-    private final URL url;
+    private URL url;
 
     public Repository(URL url) {
         this.url = url;
     }
 
-    public URL getUrl() {
+    public URL url() {
         return url;
     }
 
@@ -58,11 +58,11 @@ public final class Repository {
     @Override
     public String toString() {
         return "Repository{" +
-                ", url='" + url + '\'' +
-                '}';
+            ", url='" + url + '\'' +
+            '}';
     }
 
-    public static Repository central() throws MalformedURLException {
+    public static Repository central() throws IOException {
         if (centralInstance == null) {
             centralInstance = new Repository(new URL(CENTRAL_URL));
         }

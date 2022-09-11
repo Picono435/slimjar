@@ -34,9 +34,9 @@ import java.net.URL;
 public final class DummyRepositoryEnquirer implements RepositoryEnquirer {
     @Override
     public ResolutionResult enquire(final Dependency dependency) {
-        final String groupPath = dependency.getGroupId().replace('.', '/');
+        final String groupPath = dependency.groupId().replace('.', '/');
         try {
-            return new ResolutionResult(new Repository(new URL("https://repo.tld")), new URL(String.format("https://repo.tld/%s/%s/%s/%2$s-%3$s.jar", groupPath, dependency.getArtifactId(), dependency.getVersion())), null, false);
+            return new ResolutionResult(new Repository(new URL("https://repo.tld")), new URL(String.format("https://repo.tld/%s/%s/%s/%2$s-%3$s.jar", groupPath, dependency.artifactId(), dependency.version())), null, false, false);
         } catch (MalformedURLException e) {
             e.printStackTrace();
             return null;

@@ -28,7 +28,7 @@ import io.github.slimjar.resolver.data.Dependency;
 
 public final class UnresolvedDependencyException extends RuntimeException {
 
-    private final Dependency dependency;
+    private final transient Dependency dependency;
 
     public UnresolvedDependencyException(final Dependency dependency) {
         super("Could not resolve dependency : " + dependency);

@@ -33,7 +33,7 @@ public final class Repositories {
     }
 
     public static String fetchFormattedUrl(final Repository repository) {
-        String repoUrl = repository.getUrl().toString();
+        String repoUrl = repository.url().toString();
         if (!repoUrl.endsWith("/")) {
             repoUrl += "/";
         }

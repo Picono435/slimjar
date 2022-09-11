@@ -40,9 +40,9 @@ public final class MavenPomPathResolutionStrategy implements PathResolutionStrat
                 String.format(
                         PATH_FORMAT,
                         repoUrl,
-                        dependency.getGroupId().replace('.', '/'),
-                        dependency.getArtifactId(),
-                        dependency.getVersion()
+                        dependency.groupId().replace('.', '/'),
+                        dependency.artifactId(),
+                        dependency.version()
                 )
         );
     }

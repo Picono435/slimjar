@@ -32,16 +32,16 @@ import java.util.Objects;
 
 public final class DependencyData {
 
-    private final Collection<Mirror> mirrors;
+    private Collection<Mirror> mirrors;
     private final Collection<Repository> repositories;
     private final Collection<Dependency> dependencies;
     private final Collection<RelocationRule> relocations;
 
     public DependencyData(
-            final Collection<Mirror> mirrors,
-            final Collection<Repository> repositories,
-            final Collection<Dependency> dependencies,
-            final Collection<RelocationRule> relocations
+        final Collection<Mirror> mirrors,
+        final Collection<Repository> repositories,
+        final Collection<Dependency> dependencies,
+        final Collection<RelocationRule> relocations
     ) {
         this.mirrors = Collections.unmodifiableCollection(mirrors);
         this.repositories = Collections.unmodifiableCollection(repositories);
@@ -49,19 +49,19 @@ public final class DependencyData {
         this.relocations = Collections.unmodifiableCollection(relocations);
     }
 
-    public Collection<Repository> getRepositories() {
+    public Collection<Repository> repositories() {
         return repositories;
     }
 
-    public Collection<Dependency> getDependencies() {
+    public Collection<Dependency> dependencies() {
         return dependencies;
     }
 
-    public Collection<RelocationRule> getRelocations() {
+    public Collection<RelocationRule> relocations() {
         return relocations;
     }
 
-    public Collection<Mirror> getMirrors() {
+    public Collection<Mirror> mirrors() {
         return mirrors;
     }
 
@@ -85,10 +85,10 @@ public final class DependencyData {
     @Override
     public String toString() {
         return "DependencyData{" +
-                "mirrors=" + mirrors +
-                ", repositories=" + repositories +
-                ", dependencies=" + dependencies +
-                ", relocations=" + relocations +
-                '}';
+            "mirrors=" + mirrors +
+            ", repositories=" + repositories +
+            ", dependencies=" + dependencies +
+            ", relocations=" + relocations +
+            '}';
     }
 }

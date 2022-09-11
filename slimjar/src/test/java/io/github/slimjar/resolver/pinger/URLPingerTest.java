@@ -24,80 +24,88 @@
 
 package io.github.slimjar.resolver.pinger;
 
-import junit.framework.TestCase;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import javax.net.ssl.HttpsURLConnection;
+import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.mockito.Mockito;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({URL.class, HttpURLPinger.class})
-public class URLPingerTest extends TestCase {
+public class URLPingerTest {
 
+    @Test
     public void testHttpURLPingerHttp() throws IOException {
-        final URL mockUrl = PowerMockito.mock(URL.class);
-        final HttpURLConnection httpURLConnection = PowerMockito.mock(HttpURLConnection.class);
-        PowerMockito.when(mockUrl.openConnection()).thenReturn(httpURLConnection);
-        PowerMockito.when(mockUrl.getProtocol()).thenReturn("HTTP");
-        PowerMockito.doNothing().when(httpURLConnection).addRequestProperty("","");
-        PowerMockito.doNothing().when(httpURLConnection).connect();
-        PowerMockito.doReturn(HttpURLConnection.HTTP_OK).when(httpURLConnection).getResponseCode();
+        final var mockURL = Mockito.mock(URL.class);
+        final var httpURLConnection = Mockito.mock(HttpURLConnection.class);
+
+        Mockito.when(mockURL.openConnection()).thenReturn(httpURLConnection);
+        Mockito.when(mockURL.getProtocol()).thenReturn("HTTP");
+        Mockito.doNothing().when(httpURLConnection).addRequestProperty("","");
+        Mockito.doNothing().when(httpURLConnection).connect();
+        Mockito.doReturn(HttpURLConnection.HTTP_OK).when(httpURLConnection).getResponseCode();
+
         final URLPinger urlPinger = new HttpURLPinger();
-        boolean result = urlPinger.ping(mockUrl);
-        assertTrue("Valid http URL", result);
+        boolean result = urlPinger.ping(mockURL);
+        Assertions.assertTrue(result, "Valid http URL");
     }
 
+    @Test
     public void testHttpURLPingerHttps() throws IOException {
-        final URL mockUrl = PowerMockito.mock(URL.class);
-        final HttpsURLConnection httpsURLConnection = PowerMockito.mock(HttpsURLConnection.class);
-        PowerMockito.when(mockUrl.openConnection()).thenReturn(httpsURLConnection);
-        PowerMockito.when(mockUrl.getProtocol()).thenReturn("HTTPS");
-        PowerMockito.doNothing().when(httpsURLConnection).addRequestProperty("","");
-        PowerMockito.doNothing().when(httpsURLConnection).connect();
-        PowerMockito.doReturn(HttpURLConnection.HTTP_OK).when(httpsURLConnection).getResponseCode();
+        final var mockURL = Mockito.mock(URL.class);
+        final var httpsURLConnection = Mockito.mock(HttpsURLConnection.class);
+
+        Mockito.when(mockURL.openConnection()).thenReturn(httpsURLConnection);
+        Mockito.when(mockURL.getProtocol()).thenReturn("HTTPS");
+        Mockito.doNothing().when(httpsURLConnection).addRequestProperty("","");
+        Mockito.doNothing().when(httpsURLConnection).connect();
+        Mockito.doReturn(HttpURLConnection.HTTP_OK).when(httpsURLConnection).getResponseCode();
+
         final URLPinger urlPinger = new HttpURLPinger();
-        boolean result = urlPinger.ping(mockUrl);
-        assertTrue("Valid https URL", result);
+        boolean result = urlPinger.ping(mockURL);
+        Assertions. assertTrue(result, "Valid https URL");
     }
 
+    @Test
     public void testHttpURLPingerFailIfNotOk() throws IOException {
-        final URL mockUrl = PowerMockito.mock(URL.class);
-        final HttpsURLConnection httpsURLConnection = PowerMockito.mock(HttpsURLConnection.class);
-        PowerMockito.when(mockUrl.openConnection()).thenReturn(httpsURLConnection);
-        PowerMockito.when(mockUrl.getProtocol()).thenReturn("HTTPS");
-        PowerMockito.doNothing().when(httpsURLConnection).addRequestProperty("","");
-        PowerMockito.doNothing().when(httpsURLConnection).connect();
-        PowerMockito.doReturn(HttpURLConnection.HTTP_BAD_REQUEST).when(httpsURLConnection).getResponseCode();
+        final var mockURL = Mockito.mock(URL.class);
+        final var httpsURLConnection = Mockito.mock(HttpsURLConnection.class);
+
+        Mockito.when(mockURL.openConnection()).thenReturn(httpsURLConnection);
+        Mockito.when(mockURL.getProtocol()).thenReturn("HTTPS");
+        Mockito.doNothing().when(httpsURLConnection).addRequestProperty("","");
+        Mockito.doNothing().when(httpsURLConnection).connect();
+        Mockito.doReturn(HttpURLConnection.HTTP_BAD_REQUEST).when(httpsURLConnection).getResponseCode();
+
         final URLPinger urlPinger = new HttpURLPinger();
-        boolean result = urlPinger.ping(mockUrl);
-        assertFalse("Non-OK should fail", result);
+        boolean result = urlPinger.ping(mockURL);
+        Assertions.assertFalse(result, "Non-OK should fail");
     }
 
+    @Test
     public void testHttpURLPingerExceptionOnPing() throws IOException {
-        final URL mockUrl = PowerMockito.mock(URL.class);
-        final HttpsURLConnection httpsURLConnection = PowerMockito.mock(HttpsURLConnection.class);
-        PowerMockito.when(mockUrl.openConnection()).thenReturn(httpsURLConnection);
-        PowerMockito.when(mockUrl.getProtocol()).thenReturn("HTTPS");
-        PowerMockito.doNothing().when(httpsURLConnection).addRequestProperty("","");
-        PowerMockito.doThrow(new IOException()).when(httpsURLConnection).connect();
-        PowerMockito.doReturn(HttpURLConnection.HTTP_BAD_REQUEST).when(httpsURLConnection).getResponseCode();
+        final var mockUrl = Mockito.mock(URL.class);
+        final var httpsURLConnection = Mockito.mock(HttpsURLConnection.class);
+
+        Mockito.when(mockUrl.openConnection()).thenReturn(httpsURLConnection);
+        Mockito.when(mockUrl.getProtocol()).thenReturn("HTTPS");
+        Mockito.doNothing().when(httpsURLConnection).addRequestProperty("","");
+        Mockito.doThrow(new IOException()).when(httpsURLConnection).connect();
+        Mockito.doReturn(HttpURLConnection.HTTP_BAD_REQUEST).when(httpsURLConnection).getResponseCode();
+
         final URLPinger urlPinger = new HttpURLPinger();
         boolean result = urlPinger.ping(mockUrl);
-        assertFalse("Exception should fail", result);
+        Assertions.assertFalse(result, "Exception should fail");
     }
 
+    @Test
     public void testHttpURLPingerUnsupportedProtocol() {
-        final URL mockUrl = PowerMockito.mock(URL.class);
-        final URLPinger urlPinger = new HttpURLPinger();
+        final var mockURL = Mockito.mock(URL.class);
+        final var urlPinger = new HttpURLPinger();
 
-        PowerMockito.doReturn("NON-EXISTENT-PROTOCOL").when(mockUrl).getProtocol();
-        boolean result = urlPinger.ping(mockUrl);
-        assertFalse("Non-OK should fail", result);
+        Mockito.doReturn("NON-EXISTENT-PROTOCOL").when(mockURL).getProtocol();
+        boolean result = urlPinger.ping(mockURL);
+        Assertions.assertFalse(result, "Non-OK should fail");
     }
 
 }

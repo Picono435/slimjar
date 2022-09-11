@@ -39,22 +39,22 @@ public final class MavenSnapshotPathResolutionStrategy implements PathResolution
     @Override
     public Collection<String> pathTo(final Repository repository, final Dependency dependency) {
         final String repoUrl = Repositories.fetchFormattedUrl(repository);
-        final String version = dependency.getVersion().replace("-SNAPSHOT", "");
+        final String version = dependency.version().replace("-SNAPSHOT", "");
         final String alt = String.format(
                 PATH_FORMAT_ALT,
                 repoUrl,
-                dependency.getGroupId().replace('.', '/'),
-                dependency.getArtifactId(),
+                dependency.groupId().replace('.', '/'),
+                dependency.artifactId(),
                 version,
-                dependency.getSnapshotId()
+                dependency.snapshotId()
         );
         final String general = String.format(
                 PATH_FORMAT,
                 repoUrl,
-                dependency.getGroupId().replace('.', '/'),
-                dependency.getArtifactId(),
+                dependency.groupId().replace('.', '/'),
+                dependency.artifactId(),
                 version,
-                dependency.getSnapshotId()
+                dependency.snapshotId()
         );
         return Arrays.asList(general, alt);
     }

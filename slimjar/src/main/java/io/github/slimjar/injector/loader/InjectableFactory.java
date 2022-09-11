@@ -48,9 +48,9 @@ public final class InjectableFactory {
 
         if (isJigsawActive && classLoader instanceof URLClassLoader) {
             injectable = new WrappedInjectableClassLoader((URLClassLoader) ApplicationBuilder.class.getClassLoader());
-        } else if (isUnsafeAvailable() && classLoader instanceof URLClassLoader) {
+        } else if (isUnsafeAvailable() && classLoader instanceof URLClassLoader urlClassLoader) {
             try {
-                injectable = UnsafeInjectable.create((URLClassLoader) classLoader);
+                injectable = UnsafeInjectable.create(urlClassLoader);
             } catch (final Exception exception) {
                 // failed to prepare injectable with unsafe, ignored exception to let it silently switch to fallback agent injection
             }
