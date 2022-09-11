@@ -22,8 +22,6 @@
 // SOFTWARE.
 //
 
-@file:Suppress("UNCHECKED_CAST")
-
 package io.github.slimjar.func
 
 import io.github.slimjar.exceptions.ConfigurationNotFoundException
