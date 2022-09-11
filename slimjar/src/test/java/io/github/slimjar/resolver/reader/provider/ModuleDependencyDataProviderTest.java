@@ -58,7 +58,7 @@ public class ModuleDependencyDataProviderTest {
 
     static {
         try {
-            CENTRAL_MIRRORS = Collections.singleton(new Repository(new URL(SimpleMirrorSelector.DEFAULT_CENTRAL_MIRROR_URL)));
+            CENTRAL_MIRRORS = Collections.singleton(new Repository(new URL(Repository.CENTRAL_URL)));
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
