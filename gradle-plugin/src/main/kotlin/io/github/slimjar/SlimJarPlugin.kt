@@ -93,7 +93,6 @@ class SlimJarPlugin : Plugin<Project> {
         // Runs the task once resources are being processed to save the json file
         tasks.findByName(RESOURCES_TASK)?.finalizedBy(slimJar)
     }
-
 }
 
 internal fun slimJarLib(version: String) = "io.github.slimjar:slimjar:$version"

@@ -45,7 +45,6 @@ val Project.performCompileTimeResolution: Boolean
 val Project.applyReleaseRepo: Boolean
     get() = findProperty("slimjar.default.repo.releases.apply")?.toString()?.toBoolean() ?: true
 
-
 /**
  * Checks in the gradle.properties if should or not add the slimJar snapshot repo by default
  */
@@ -58,7 +57,6 @@ val Project.applySnapshotRepo: Boolean
 val Project.slimInjectToIsolated: Boolean
     get() = findProperty("slimjar.default.isolated.inject")?.toString()?.toBoolean() ?: true
 
-
 /**
  * Utility for creating a configuration that extends another
  */
@@ -68,7 +66,7 @@ fun Project.createConfig(configName: String, vararg extends: String): Configurat
     }
 
     val slimConfig = configurations.create(configName)
-    compileOnlyConfig.forEach { it.extendsFrom(slimConfig)}
+    compileOnlyConfig.forEach { it.extendsFrom(slimConfig) }
     slimConfig.isTransitive = true
 
     return slimConfig

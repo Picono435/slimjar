@@ -43,5 +43,4 @@ class RelocationConfig {
         exclusions.addAll(pattern)
         return this
     }
-
 }

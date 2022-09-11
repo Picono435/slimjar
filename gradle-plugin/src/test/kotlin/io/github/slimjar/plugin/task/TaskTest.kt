@@ -41,5 +41,4 @@ class TaskTest {
             project.tasks.getByName("slimJar")
         }.doesNotThrowAnyException()
     }
-
 }

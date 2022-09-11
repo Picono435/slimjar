@@ -41,5 +41,4 @@ class PluginTest {
             project.plugins.getPlugin("java")
         }.doesNotThrowAnyException()
     }
-
 }

@@ -62,5 +62,4 @@ class ConfigurationTest {
             project.dependencies.add(SIM_API_CONFIG_NAME, "com.google.code.gson:gson:2.8.6")
         }.doesNotThrowAnyException()
     }*/
-
 }
