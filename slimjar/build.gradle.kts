@@ -1,7 +1,7 @@
 import java.net.URI
 
 plugins {
-    id("com.github.johnrengelman.shadow") version "7.0.0"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
     java
     `maven-publish`
 }

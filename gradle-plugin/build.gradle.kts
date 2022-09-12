@@ -37,6 +37,14 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.0")
     testImplementation("org.assertj:assertj-core:3.23.1")
+
+    configurations {
+        this.onEach {
+            it.exclude(group = "org.apache.logging.log4j", module = "log4j-core")
+            it.exclude(group = "org.apache.logging.log4j", module = "log4j-api")
+            it.exclude(group = "org.apache.logging.log4j", module = "log4j-slf4j-impl")
+        }
+    }
 }
 
 val shadowJarTask = tasks.named("shadowJar", ShadowJar::class.java)

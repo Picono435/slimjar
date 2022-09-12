@@ -211,7 +211,7 @@ abstract class SlimJar @Inject constructor(private val config: Configuration) : 
             pomURLCreationStrategy,
             urlPinger
         )
-        val mirrorSelector = SimpleMirrorSelector(setOf(Repository(URL("https://repo.maven.apache.org/maven2/"))))
+        val mirrorSelector = SimpleMirrorSelector()
         val resolver = CachingDependencyResolver(
             urlPinger,
             mirrorSelector.select(repositories, mirrors),
