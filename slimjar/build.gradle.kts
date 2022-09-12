@@ -38,7 +38,7 @@ publishing {
         pom {
             name.set("SlimJar")
             description.set("A simple and robust runtime dependency manager for JVM languages.")
-            url.set("http://www.github.com/DaRacci/slimjar")
+            url.set("https://www.github.com/DaRacci/slimjar")
             licenses {
                 license {
                     name.set("The MIT License")
