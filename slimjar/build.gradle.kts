@@ -1,29 +1,13 @@
-import java.net.URI
-
 plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    java
     `maven-publish`
 }
 
 version = "1.2.9"
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
-
 dependencies {
     testImplementation("me.lucko:jar-relocator:1.5")
     testImplementation("com.google.code.gson:gson:2.9.1")
-    testImplementation("org.junit.vintage:junit-vintage-engine:5.9.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.mockito:mockito-core:4.7.0")
     testImplementation("org.mockito:mockito-inline:4.7.0")
     testImplementation("cglib:cglib:3.3.0")
@@ -70,12 +54,6 @@ publishing {
                 url.set("https://github.com/DaRacci/slimjar")
             }
         }
-    }
-
-    repositories.maven {
-        name = "RacciRepo"
-        url = URI("https://repo.racci.dev/${if (project.version.toString().endsWith("-SNAPSHOT")) "snapshots" else "releases"}")
-        credentials(PasswordCredentials::class)
     }
 }
 
