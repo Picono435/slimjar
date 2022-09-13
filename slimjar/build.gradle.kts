@@ -8,8 +8,8 @@ version = "1.2.9"
 dependencies {
     testImplementation("me.lucko:jar-relocator:1.5")
     testImplementation("com.google.code.gson:gson:2.9.1")
-    testImplementation("org.mockito:mockito-core:4.7.0")
-    testImplementation("org.mockito:mockito-inline:4.7.0")
+    testImplementation("org.mockito:mockito-core:4.8.0")
+    testImplementation("org.mockito:mockito-inline:4.8.0")
     testImplementation("cglib:cglib:3.3.0")
 }
 
