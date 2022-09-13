@@ -77,7 +77,7 @@ public final class ByteBuddyInstrumentationFactory implements InstrumentationFac
     }
 
     @Override
-    public Instrumentation create() throws IOException, ReflectiveOperationException, URISyntaxException, NoSuchAlgorithmException {
+    public Instrumentation create() throws IOException, ReflectiveOperationException, URISyntaxException, NoSuchAlgorithmException, InterruptedException {
         final URL extractedURL = extractor.extractModule(agentJarUrl, "loader-agent");
 
         final String pattern = generatePattern();

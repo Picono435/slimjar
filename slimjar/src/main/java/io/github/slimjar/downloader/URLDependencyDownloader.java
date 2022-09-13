@@ -58,7 +58,7 @@ public final class URLDependencyDownloader implements DependencyDownloader {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
-    public File download(final Dependency dependency) throws IOException {
+    public File download(final Dependency dependency) throws IOException, InterruptedException {
         final File expectedOutputFile = outputWriterProducer.getStrategy().selectFileFor(dependency);
 
         if (expectedOutputFile.exists() &&

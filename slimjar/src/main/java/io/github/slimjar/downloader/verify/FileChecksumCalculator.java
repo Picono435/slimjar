@@ -29,6 +29,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,18 +39,22 @@ public final class FileChecksumCalculator implements ChecksumCalculator {
     private static final String DIRECTORY_HASH = "DIRECTORY";
     private static final Logger LOGGER = Logger.getLogger(FileChecksumCalculator.class.getName());
     private final MessageDigest digest;
+    private final ReentrantReadWriteLock lock;
 
     public FileChecksumCalculator(final String algorithm) throws NoSuchAlgorithmException {
         digest = MessageDigest.getInstance(algorithm);
+        lock = new ReentrantReadWriteLock(false);
     }
 
     @Override
-    public String calculate(final File file) throws IOException {
+    public String calculate(final File file) throws IOException, InterruptedException {
         LOGGER.log(Level.FINEST, "Calculating hash for {0}", file.getPath());
         // This helps run IDE environment as a special case
         if (file.isDirectory()) {
             return DIRECTORY_HASH;
         }
+
+        lock.writeLock().tryLock(10, TimeUnit.SECONDS);
         digest.reset();
         try (final FileInputStream fis = new FileInputStream(file)) {
             byte[] byteArray = new byte[1024];
@@ -57,6 +64,7 @@ public final class FileChecksumCalculator implements ChecksumCalculator {
             }
         }
         byte[] bytes = digest.digest();
+        lock.writeLock().unlock();
 
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {

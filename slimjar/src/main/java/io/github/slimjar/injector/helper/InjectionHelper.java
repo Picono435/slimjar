@@ -31,21 +31,39 @@ import io.github.slimjar.resolver.data.Dependency;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 public final class InjectionHelper {
+    private final Set<Dependency> injectedDependencies;
     private final DependencyDownloader dependencyDownloader;
     private final RelocationHelper relocationHelper;
 
-    public InjectionHelper(final DependencyDownloader dependencyDownloader, final RelocationHelper relocationHelper) {
+    public InjectionHelper(
+        final DependencyDownloader dependencyDownloader,
+        final RelocationHelper relocationHelper,
+        final Set<Dependency> injectedDependencies
+    ) {
         this.dependencyDownloader = dependencyDownloader;
         this.relocationHelper = relocationHelper;
+        this.injectedDependencies = injectedDependencies;
     }
 
-    public File fetch(final Dependency dependency) throws IOException, ReflectiveOperationException {
+    public InjectionHelper(final DependencyDownloader dependencyDownloader, final RelocationHelper relocationHelper) {
+        this(dependencyDownloader, relocationHelper, new HashSet<>());
+    }
+
+    public File fetch(final Dependency dependency) throws IOException, ReflectiveOperationException, InterruptedException {
         final File downloaded = dependencyDownloader.download(dependency);
         if (downloaded == null) {
             return null;
         }
+
+        injectedDependencies.add(dependency);
         return relocationHelper.relocate(dependency, downloaded);
+    }
+
+    public boolean isInjected(final Dependency dependency) {
+        return injectedDependencies.contains(dependency);
     }
 }

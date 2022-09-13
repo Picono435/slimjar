@@ -38,11 +38,11 @@ public final class InjectableFactory {
     private InjectableFactory() {
     }
 
-    public static Injectable create(final Path downloadPath, final Collection<Repository> repositories) throws ReflectiveOperationException, NoSuchAlgorithmException, IOException, URISyntaxException {
+    public static Injectable create(final Path downloadPath, final Collection<Repository> repositories) throws ReflectiveOperationException, NoSuchAlgorithmException, IOException, URISyntaxException, InterruptedException {
         return create(downloadPath, repositories, InjectableFactory.class.getClassLoader());
     }
 
-    public static Injectable create(final Path downloadPath, final Collection<Repository> repositories, final ClassLoader classLoader) throws URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException, IOException {
+    public static Injectable create(final Path downloadPath, final Collection<Repository> repositories, final ClassLoader classLoader) throws URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException, IOException, InterruptedException {
         final boolean isJigsawActive = isJigsawActive();
         Injectable injectable = null;
 

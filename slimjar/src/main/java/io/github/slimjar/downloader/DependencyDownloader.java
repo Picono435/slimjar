@@ -30,5 +30,5 @@ import java.io.File;
 import java.io.IOException;
 
 public interface DependencyDownloader {
-    File download(final Dependency dependency) throws IOException;
+    File download(final Dependency dependency) throws IOException, InterruptedException;
 }

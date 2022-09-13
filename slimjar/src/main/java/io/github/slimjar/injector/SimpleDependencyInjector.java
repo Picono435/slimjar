@@ -31,16 +31,19 @@ import io.github.slimjar.resolver.ResolutionResult;
 import io.github.slimjar.resolver.data.Dependency;
 import io.github.slimjar.resolver.data.DependencyData;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public final class SimpleDependencyInjector implements DependencyInjector {
     private final InjectionHelperFactory injectionHelperFactory;
+    private final List<Dependency> processingDependencies = Collections.synchronizedList(new ArrayList<>());
 
     public SimpleDependencyInjector(final InjectionHelperFactory injectionHelperFactory) {
         this.injectionHelperFactory = injectionHelperFactory;
@@ -52,20 +55,31 @@ public final class SimpleDependencyInjector implements DependencyInjector {
         injectDependencies(injectable, helper, data.dependencies());
     }
 
-    private void injectDependencies(final Injectable injectable, final InjectionHelper injectionHelper, final Collection<Dependency> dependencies) throws ReflectiveOperationException {
-        for (final Dependency dependency : dependencies) {
-            try {
-                final File depJar = injectionHelper.fetch(dependency);
-                if (depJar == null) {
-                    continue;
+    // TODO -> Download dependencies in parallel then check the checksums after instead of during the download
+    private void injectDependencies(final Injectable injectable, final InjectionHelper injectionHelper, final Collection<Dependency> dependencies) throws RuntimeException {
+        dependencies.parallelStream()
+            .filter(dependency -> !injectionHelper.isInjected(dependency))
+            .forEach(dependency -> {
+                if (processingDependencies.contains(dependency)) return;
+                processingDependencies.add(dependency);
+
+                try {
+                    final var depJar = injectionHelper.fetch(dependency);
+
+                    if (depJar == null) return;
+
+                    injectable.inject(depJar.toURI().toURL());
+                    injectDependencies(injectable, injectionHelper, dependency.transitive());
+                } catch (final IOException e) {
+                    throw new InjectionFailedException(dependency, e);
+                } catch (IllegalAccessException | InvocationTargetException | URISyntaxException e) {
+                    e.printStackTrace();
+                } catch (ReflectiveOperationException | InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
-                injectable.inject(depJar.toURI().toURL());
-                injectDependencies(injectable, injectionHelper, dependency.transitive());
-            } catch (final IOException e) {
-                throw new InjectionFailedException(dependency, e);
-            } catch (IllegalAccessException | InvocationTargetException | URISyntaxException e) {
-                e.printStackTrace();
+
+                processingDependencies.remove(dependency);
             }
-        }
+        );
     }
 }

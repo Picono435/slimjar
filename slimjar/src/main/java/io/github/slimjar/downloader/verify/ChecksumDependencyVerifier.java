@@ -59,7 +59,7 @@ public final class ChecksumDependencyVerifier implements DependencyVerifier {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
-    public boolean verify(final File file, final Dependency dependency) throws IOException {
+    public boolean verify(final File file, final Dependency dependency) throws IOException, InterruptedException {
         if (!file.exists()) return false;
         LOGGER.log("Verifying checksum for %s", dependency.artifactId());
         final File checksumFile = outputWriterFactory.getStrategy().selectFileFor(dependency);

@@ -30,5 +30,5 @@ import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 
 public interface InstrumentationFactory {
-    Instrumentation create() throws IOException, ReflectiveOperationException, URISyntaxException, NoSuchAlgorithmException;
+    Instrumentation create() throws IOException, ReflectiveOperationException, URISyntaxException, NoSuchAlgorithmException, InterruptedException;
 }

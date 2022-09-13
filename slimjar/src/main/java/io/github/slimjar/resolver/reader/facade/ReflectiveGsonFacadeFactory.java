@@ -67,12 +67,12 @@ public final class ReflectiveGsonFacadeFactory implements GsonFacadeFactory {
         return new ReflectiveGsonFacade(gson, gsonFromJsonMethod, gsonFromJsonTypeMethod, canonicalizeMethod);
     }
 
-    public static GsonFacadeFactory create(final Path downloadPath, final Collection<Repository> repositories) throws ReflectiveOperationException, NoSuchAlgorithmException, IOException, URISyntaxException {
+    public static GsonFacadeFactory create(final Path downloadPath, final Collection<Repository> repositories) throws ReflectiveOperationException, NoSuchAlgorithmException, IOException, URISyntaxException, InterruptedException {
         final InjectableClassLoader classLoader = new IsolatedInjectableClassLoader();
         return create(downloadPath, repositories, classLoader);
     }
 
-    public static GsonFacadeFactory create(final Path downloadPath, final Collection<Repository> repositories, final InjectableClassLoader classLoader) throws ReflectiveOperationException, NoSuchAlgorithmException, IOException, URISyntaxException {
+    public static GsonFacadeFactory create(final Path downloadPath, final Collection<Repository> repositories, final InjectableClassLoader classLoader) throws ReflectiveOperationException, NoSuchAlgorithmException, IOException, URISyntaxException, InterruptedException {
         ApplicationBuilder.injecting("SlimJar", classLoader)
                 .downloadDirectoryPath(downloadPath)
                 .dataProviderFactory(url -> () -> ReflectiveGsonFacadeFactory.getGsonDependency(repositories))

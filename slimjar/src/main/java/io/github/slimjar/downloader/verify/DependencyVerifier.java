@@ -30,6 +30,6 @@ import java.io.File;
 import java.io.IOException;
 
 public interface DependencyVerifier {
-    boolean verify(final File file, final Dependency dependency) throws IOException;
+    boolean verify(final File file, final Dependency dependency) throws IOException, InterruptedException;
     File getChecksumFile(final  Dependency dependency);
 }

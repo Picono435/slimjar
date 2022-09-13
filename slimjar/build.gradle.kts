@@ -3,7 +3,7 @@ plugins {
     `maven-publish`
 }
 
-version = "1.2.9"
+version = "1.2.10"
 
 dependencies {
     testImplementation("me.lucko:jar-relocator:1.5")

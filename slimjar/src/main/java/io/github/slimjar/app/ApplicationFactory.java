@@ -39,13 +39,13 @@ public final class ApplicationFactory {
         return createIsolatedApplication(moduleNames, fqClassName, ClassLoader.getSystemClassLoader().getParent(), args);
     }
 
-    public Application createIsolatedApplication(final String applicationName, final Collection<String> moduleNames, final String fqClassName, final ClassLoader parent, final Object... args) throws ReflectiveOperationException, ClassCastException, IOException, URISyntaxException, NoSuchAlgorithmException {
+    public Application createIsolatedApplication(final String applicationName, final Collection<String> moduleNames, final String fqClassName, final ClassLoader parent, final Object... args) throws ReflectiveOperationException, ClassCastException, IOException, URISyntaxException, NoSuchAlgorithmException, InterruptedException {
         final IsolationConfiguration config = new IsolationConfiguration.Builder()
                 .modules(moduleNames).applicationClass(fqClassName).parentClassLoader(parent).build();
         return ApplicationBuilder.isolated(applicationName, config, args).build();
     }
 
-    public Application createAppendingApplication(final String applicationName) throws URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException, IOException {
+    public Application createAppendingApplication(final String applicationName) throws URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException, IOException, InterruptedException {
         return ApplicationBuilder.appending(applicationName).build();
     }
 }

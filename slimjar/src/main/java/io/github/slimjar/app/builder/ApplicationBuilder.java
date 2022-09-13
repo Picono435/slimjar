@@ -324,7 +324,7 @@ public abstract class ApplicationBuilder {
         return downloadDirectoryPath;
     }
 
-    protected final RelocatorFactory getRelocatorFactory() throws ReflectiveOperationException, NoSuchAlgorithmException, IOException, URISyntaxException {
+    protected final RelocatorFactory getRelocatorFactory() throws ReflectiveOperationException, NoSuchAlgorithmException, IOException, URISyntaxException, InterruptedException {
         if (relocatorFactory == null) {
             final JarRelocatorFacadeFactory jarRelocatorFacadeFactory = ReflectiveJarRelocatorFacadeFactory.create(getDownloadDirectoryPath(), Collections.singleton(Repository.central()));
             this.relocatorFactory = new JarFileRelocatorFactory(jarRelocatorFacadeFactory);
@@ -332,7 +332,7 @@ public abstract class ApplicationBuilder {
         return relocatorFactory;
     }
 
-    protected final DependencyDataProviderFactory getModuleDataProviderFactory() throws URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException, IOException {
+    protected final DependencyDataProviderFactory getModuleDataProviderFactory() throws URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException, IOException, InterruptedException {
         if (moduleDataProviderFactory == null) {
             final GsonFacadeFactory gsonFacadeFactory = ReflectiveGsonFacadeFactory.create(getDownloadDirectoryPath(), Collections.singleton(Repository.central()));
             this.moduleDataProviderFactory = new ExternalDependencyDataProviderFactory(gsonFacadeFactory);
@@ -340,7 +340,7 @@ public abstract class ApplicationBuilder {
         return moduleDataProviderFactory;
     }
 
-    protected final DependencyDataProviderFactory getDataProviderFactory() throws URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException, IOException {
+    protected final DependencyDataProviderFactory getDataProviderFactory() throws URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException, IOException, InterruptedException {
         if (dataProviderFactory == null) {
             final GsonFacadeFactory gsonFacadeFactory = ReflectiveGsonFacadeFactory.create(getDownloadDirectoryPath(), Collections.singleton(Repository.central()));
             this.dataProviderFactory = new GsonDependencyDataProviderFactory(gsonFacadeFactory);
@@ -348,7 +348,7 @@ public abstract class ApplicationBuilder {
         return dataProviderFactory;
     }
 
-    protected final PreResolutionDataProviderFactory getPreResolutionDataProviderFactory() throws URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException, IOException {
+    protected final PreResolutionDataProviderFactory getPreResolutionDataProviderFactory() throws URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException, IOException, InterruptedException {
         if (preResolutionDataProviderFactory == null) {
             final GsonFacadeFactory gsonFacadeFactory = ReflectiveGsonFacadeFactory.create(getDownloadDirectoryPath(), Collections.singleton(Repository.central()));
             this.preResolutionDataProviderFactory = new GsonPreResolutionDataProviderFactory(gsonFacadeFactory);
@@ -356,7 +356,7 @@ public abstract class ApplicationBuilder {
         return preResolutionDataProviderFactory;
     }
 
-    protected final RelocationHelperFactory getRelocationHelperFactory() throws NoSuchAlgorithmException, IOException, URISyntaxException {
+    protected final RelocationHelperFactory getRelocationHelperFactory() throws NoSuchAlgorithmException, IOException, URISyntaxException, InterruptedException {
         if (relocationHelperFactory == null) {
             final FileChecksumCalculator checksumCalculator = new FileChecksumCalculator("SHA-256");
             final FilePathStrategy pathStrategy = FilePathStrategy.createRelocationStrategy(getDownloadDirectoryPath().toFile(), getApplicationName());
@@ -425,7 +425,7 @@ public abstract class ApplicationBuilder {
         return logger;
     }
 
-    protected final DependencyInjector createInjector() throws IOException, URISyntaxException, NoSuchAlgorithmException, ReflectiveOperationException {
+    protected final DependencyInjector createInjector() throws IOException, URISyntaxException, NoSuchAlgorithmException, ReflectiveOperationException, InterruptedException {
         final InjectionHelperFactory injectionHelperFactory = new InjectionHelperFactory(
                 getDownloadDirectoryPath(),
                 getRelocatorFactory(),
@@ -441,7 +441,7 @@ public abstract class ApplicationBuilder {
         return getInjectorFactory().create(injectionHelperFactory);
     }
 
-    public final Application build() throws IOException, ReflectiveOperationException, URISyntaxException, NoSuchAlgorithmException {
+    public final Application build() throws IOException, ReflectiveOperationException, URISyntaxException, NoSuchAlgorithmException, InterruptedException {
         final MediatingProcessLogger mediatingLogger = LogDispatcher.getMediatingLogger();
         final ProcessLogger logger = getLogger();
         mediatingLogger.addLogger(logger);
@@ -450,6 +450,6 @@ public abstract class ApplicationBuilder {
         return result;
     }
 
-    protected abstract Application buildApplication() throws IOException, ReflectiveOperationException, URISyntaxException, NoSuchAlgorithmException;
+    protected abstract Application buildApplication() throws IOException, ReflectiveOperationException, URISyntaxException, NoSuchAlgorithmException, InterruptedException;
 
 }
