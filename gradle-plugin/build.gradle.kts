@@ -12,7 +12,7 @@ plugins {
     `maven-publish`
 }
 
-version = "1.3.2"
+version = "1.3.3"
 
 repositories {
     maven("https://plugins.gradle.org/m2/")
