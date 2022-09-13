@@ -12,7 +12,7 @@ plugins {
     `maven-publish`
 }
 
-version = "1.3.1"
+version = "1.3.2"
 
 repositories {
     maven("https://plugins.gradle.org/m2/")
@@ -23,11 +23,11 @@ configurations["compileOnly"].extendsFrom(shadowImplementation)
 configurations["testImplementation"].extendsFrom(shadowImplementation)
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
     shadowImplementation(kotlin("stdlib"))
     shadowImplementation(project(":slimjar"))
     shadowImplementation("com.google.code.gson:gson:2.9.1")
+    shadowImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
     compileOnly("com.github.jengelman.gradle.plugins:shadow:6.1.0")
 
@@ -35,11 +35,11 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.23.1")
 
     // For grade log4j checker.
-    configurations.onEach {
-        it.exclude(group = "org.apache.logging.log4j", module = "log4j-core")
-        it.exclude(group = "org.apache.logging.log4j", module = "log4j-api")
-        it.exclude(group = "org.apache.logging.log4j", module = "log4j-slf4j-impl")
-    }
+//    configurations.onEach {
+//        it.exclude(group = "org.apache.logging.log4j", module = "log4j-core")
+//        it.exclude(group = "org.apache.logging.log4j", module = "log4j-api")
+//        it.exclude(group = "org.apache.logging.log4j", module = "log4j-slf4j-impl")
+//    }
 }
 
 val shadowJarTask = tasks.named("shadowJar", ShadowJar::class.java)

@@ -66,12 +66,12 @@ public final class InjectingApplicationBuilder extends ApplicationBuilder {
         return new AppendingApplication();
     }
 
-    public static ApplicationBuilder createAppending(final String applicationName) throws ReflectiveOperationException, NoSuchAlgorithmException, IOException, URISyntaxException {
+    public static ApplicationBuilder createAppending(final String applicationName) {
         final ClassLoader classLoader = ApplicationBuilder.class.getClassLoader();
         return createAppending(applicationName, classLoader);
     }
 
-    public static ApplicationBuilder createAppending(final String applicationName, final ClassLoader classLoader) throws ReflectiveOperationException, NoSuchAlgorithmException, IOException, URISyntaxException {
+    public static ApplicationBuilder createAppending(final String applicationName, final ClassLoader classLoader) {
         return new InjectingApplicationBuilder(applicationName, (ApplicationBuilder builder) -> {
             try {
                 return InjectableFactory.create(builder.getDownloadDirectoryPath(), Collections.singleton(Repository.central()), classLoader);

@@ -25,13 +25,13 @@
 package io.github.slimjar.task
 
 import com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import io.github.slimjar.SLIM_API_CONFIGURATION_NAME
 import io.github.slimjar.SlimJarPlugin
 import io.github.slimjar.func.performCompileTimeResolution
 import io.github.slimjar.func.slimInjectToIsolated
-import io.github.slimjar.relocation.RelocationConfig
 import io.github.slimjar.relocation.RelocationRule
 import io.github.slimjar.resolver.CachingDependencyResolver
 import io.github.slimjar.resolver.ResolutionResult
@@ -49,67 +49,72 @@ import io.github.slimjar.resolver.strategy.MavenSnapshotPathResolutionStrategy
 import io.github.slimjar.resolver.strategy.MediatingPathResolutionStrategy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.toCollection
 import kotlinx.coroutines.runBlocking
-import org.gradle.api.Action
+import kotlinx.coroutines.selects.select
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ResolvableDependencies
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.diagnostics.internal.graph.nodes.RenderableDependency
 import org.gradle.api.tasks.diagnostics.internal.graph.nodes.RenderableModuleResult
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
-import java.net.URL
 import javax.inject.Inject
 
-private val scope = CoroutineScope(IO)
-
 @CacheableTask
-abstract class SlimJar @Inject constructor(private val config: Configuration) : DefaultTask() {
+abstract class SlimJar @Inject constructor(
+    @Transient private val config: Configuration
+) : DefaultTask() {
 
-    // Find by name since it won't always be present
-    private val apiConfig = project.configurations.findByName(SLIM_API_CONFIGURATION_NAME)
+    private companion object {
+        val gson: Gson = GsonBuilder().setPrettyPrinting().create()
+    }
 
-    private val relocations = mutableSetOf<RelocationRule>()
-    private val mirrors = mutableSetOf<Mirror>()
-    private val isolatedProjects = mutableSetOf<Project>()
+    @Transient private val relocations = mutableSetOf<RelocationRule>()
 
-    private val gson = GsonBuilder().setPrettyPrinting().create()
-    private val shadowWriteFolder = File("${project.buildDir}/resources/main/")
+    @Transient private val mirrors = mutableSetOf<Mirror>()
 
-    @Input
-    var shade = true
+    @Transient private val isolatedProjects = mutableSetOf<Project>()
+
+    @get:Input
+    @get:Optional // Find by name since it won't always be present
+    val incomingDependencies = project.configurations.findByName(SLIM_API_CONFIGURATION_NAME)?.incoming
+
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    val buildDirectory: File = project.buildDir.relativeTo(project.rootDir)
 
     @get:OutputDirectory
-    val outputDirectory: File = File("${project.buildDir}/resources/slimjar/")
+    val shadowWriteFolder: File = project.buildDir.resolve("resources/main/")
+
+    @get:OutputDirectory
+    val outputDirectory: File = buildDirectory.resolve("resources/slimjar/")
 
     init {
         group = "slimJar"
         inputs.files(config)
-    }
-
-    open fun relocate(original: String, relocated: String): SlimJar {
-        return addRelocation(original, relocated, null)
-    }
-
-    open fun relocate(original: String, relocated: String, configure: Action<RelocationConfig>): SlimJar {
-        return addRelocation(original, relocated, configure)
-    }
-
-    open fun mirror(mirror: String, original: String) {
-        mirrors.add(Mirror(URL(mirror), URL(original)))
-    }
-
-    open infix fun String.mirroring(original: String) {
-        mirrors.add(Mirror(URL(this), URL(original)))
     }
 
     open fun isolate(proj: Project) {
@@ -133,19 +138,11 @@ abstract class SlimJar @Inject constructor(private val config: Configuration) : 
      */
     @TaskAction
     internal fun createJson() = with(project) {
-        val dependencies = RenderableModuleResult(config.incoming.resolutionResult.root)
-            .children
-            .mapNotNull { it.toSlimDependency() }
-            .toMutableSet()
-
-        // If api config is present map dependencies from it as well
-        apiConfig?.let { config ->
-            RenderableModuleResult(config.incoming.resolutionResult.root)
-                .children
-                .mapNotNullTo(dependencies) { it.toSlimDependency() }
-        }
-
         val repositories = repositories.getMavenRepos()
+        val dependencies = config.incoming.getSlimDependencies().toMutableSet()
+
+        // If api config is present map dependencies from it as well.
+        incomingDependencies?.getSlimDependencies()?.toCollection(dependencies)
 
         // Note: Commented out to allow creation of empty dependency file
         // if (dependencies.isEmpty() || repositories.isEmpty()) return
@@ -163,7 +160,7 @@ abstract class SlimJar @Inject constructor(private val config: Configuration) : 
         file.copyTo(File(shadowWriteFolder, file.name), true)
     }
 
-    // Finds jars to be isolated and adds them to final jar
+    // Finds jars to be isolated and adds them to the final jar.
     @TaskAction
     internal fun includeIsolatedJars() = with(project) {
         isolatedProjects.filter { it != this }.forEach {
@@ -171,32 +168,30 @@ abstract class SlimJar @Inject constructor(private val config: Configuration) : 
             val jarTask = shadowTask ?: it.getTasksByName("jar", true).firstOrNull()
             jarTask?.let { task ->
                 val archive = task.outputs.files.singleFile
-                if (outputDirectory.exists().not()) outputDirectory.mkdirs()
+                if (!outputDirectory.exists()) outputDirectory.mkdirs()
                 val output = File(outputDirectory, "${it.name}.isolated-jar")
                 archive.copyTo(output, true)
 
                 // Copies to shadow's main folder
-                if (shadowWriteFolder.exists().not()) shadowWriteFolder.mkdirs()
+                if (!shadowWriteFolder.exists()) shadowWriteFolder.mkdirs()
                 output.copyTo(File(shadowWriteFolder, output.name), true)
             }
         }
     }
 
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     @TaskAction
     internal fun generateResolvedDependenciesFile() = with(project) {
         if (!project.performCompileTimeResolution) return@with
 
-        fun Collection<Dependency>.flatten(): MutableSet<Dependency> {
-            return this.flatMap { it.transitive().flatten() + it }.toMutableSet()
-        }
+        val file = outputDirectory.resolve("slimjar-resolutions.json")
 
-        val file = File(outputDirectory, "slimjar-resolutions.json")
         val preResolved: MutableMap<String, ResolutionResult> = if (file.exists()) {
-            gson.fromJson(FileReader(file), TypeToken.getParameterized(MutableMap::class.java, String::class.java, ResolutionResult::class.java).type)
+            val mapType = object : TypeToken<MutableMap<String, ResolutionResult>>() {}.type
+            gson.fromJson(FileReader(file), mapType)
         } else mutableMapOf()
-        val dependencies = RenderableModuleResult(config.incoming.resolutionResult.root).children
-            .mapNotNull { it.toSlimDependency() }
-            .toMutableSet().flatten()
+
+        val dependencies = config.incoming.getSlimDependencies().toMutableSet().flatten()
         val repositories = repositories.getMavenRepos()
 
         val releaseStrategy = MavenPathResolutionStrategy()
@@ -218,14 +213,17 @@ abstract class SlimJar @Inject constructor(private val config: Configuration) : 
             enquirerFactory,
             mapOf()
         )
-        val result: MutableMap<String, ResolutionResult> = runBlocking(IO) {
-            dependencies.filter { // Filter to enforce incremental resolution
-                preResolved[it.toString()]?.let { pre ->
-                    repositories.none { r -> pre.repository.url().toString() == r.url().toString() }
-                } ?: true
-            }.map {
-                scope.async { it.toString() to resolver.resolve(it).orElse(null) }
-            }.awaitAll().toMap().toMutableMap()
+
+        val result = mutableMapOf<String, ResolutionResult>()
+        runBlocking(IO) {
+            dependencies.asFlow()
+                .filter {
+                    preResolved[it.toString()]?.let { pre ->
+                        repositories.none { r -> pre.repository.url().toString() == r.url().toString() }
+                    } ?: true
+                }.concurrentMap(this, 32) {
+                    it.toString() to resolver.resolve(it).orElse(null)
+                }.onEach { result[it.first] = it.second }.collect()
         }
 
         preResolved.forEach { result.putIfAbsent(it.key, it.value) }
@@ -248,20 +246,20 @@ abstract class SlimJar @Inject constructor(private val config: Configuration) : 
         return relocations
     }
 
-    /**
-     * Adds a relocation to the list, method had to be separated because Gradle doesn't support default values.
-     */
-    private fun addRelocation(
-        original: String,
-        relocated: String,
-        configure: Action<RelocationConfig>? = null
-    ): SlimJar {
-        val relocationConfig = RelocationConfig()
-        configure?.execute(relocationConfig)
-        val rule = RelocationRule(original, relocated, relocationConfig.exclusions, relocationConfig.inclusions)
-        relocations.add(rule)
-        return this
-    }
+//    /**
+//     * Adds a relocation to the list, method had to be separated because Gradle doesn't support default values.
+//     */
+//    private fun addRelocation(
+//        original: String,
+//        relocated: String,
+//        configure: Action<RelocationConfig>? = null
+//    ): SlimJar {
+//        val relocationConfig = RelocationConfig()
+//        configure?.execute(relocationConfig)
+//        val rule = RelocationRule(original, relocated, relocationConfig.exclusions, relocationConfig.inclusions)
+//        relocations.add(rule)
+//        return this
+//    }
 
     /**
      * Turns a [RenderableDependency] into a [Dependency] with all its transitives.
@@ -293,17 +291,34 @@ abstract class SlimJar @Inject constructor(private val config: Configuration) : 
      * group:artifact:version:snapshot - The snapshot is the only nullable value.
      */
     private fun String.toDependency(transitive: Set<Dependency>): Dependency? {
-        val values = split(":")
-        val group = values.getOrNull(0) ?: return null
-        val artifact = values.getOrNull(1) ?: return null
-        val version = values.getOrNull(2) ?: return null
-        val snapshot = values.getOrNull(3)
+        val array = arrayOfNulls<Any>(5)
+        array[4] = transitive
 
-        return Dependency(group, artifact, version, snapshot, transitive)
+        split(":").takeIf { it.size >= 3 }?.forEachIndexed { index, s ->
+            array[index] = s
+        } ?: return null
+
+        return Dependency::class.java.constructors.first().newInstance(*array) as Dependency
     }
 
     private fun RepositoryHandler.getMavenRepos() = this.filterIsInstance<MavenArtifactRepository>()
         .filterNot { it.url.toString().startsWith("file") }
         .toSet()
         .map { Repository(it.url.toURL()) }
+
+    private fun ResolvableDependencies.getSlimDependencies(): List<Dependency> = RenderableModuleResult(this.resolutionResult.root)
+        .children.mapNotNull { it.toSlimDependency() }
+
+    private fun Collection<Dependency>.flatten(): MutableSet<Dependency> {
+        return this.flatMap { it.transitive().flatten() + it }.toMutableSet()
+    }
+
+    private fun <T, R> Flow<T>.concurrentMap(
+        scope: CoroutineScope,
+        concurrencyLevel: Int,
+        transform: suspend (T) -> R
+    ): Flow<R> = this
+        .map { scope.async { transform(it) } }
+        .buffer(concurrencyLevel)
+        .map { it.await() }
 }
