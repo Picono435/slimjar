@@ -1,17 +1,17 @@
 <h1 align="center">Slim Jar</h1>
 <h3 align="center">Runtime Dependency Management</h3>
   <div align="center">
-    <a href="https://github.com/SlimJar/slimjar/">
-        <img src="https://img.shields.io/github/license/SlimJar/slimjar">
+    <a href="https://github.com/DaRacci/slimjar/">
+        <img src="https://img.shields.io/github/license/DaRacci/slimjar">
     </a>
-    <a href="https://github.com/SlimJar/slimjar/actions/workflows/gradle.yml">
-        <img src="https://github.com/SlimJar/slimjar/actions/workflows/gradle.yml/badge.svg">
+    <a href="https://github.com/DaRacci/slimjar/actions/workflows/gradle.yml">
+        <img src="https://github.com/DaRacci/slimjar/actions/workflows/gradle.yml/badge.svg">
     </a>
     <a href="https://plugins.gradle.org/plugin/io.github.slimjar">
-        <img src="https://img.shields.io/maven-metadata/v.svg?label=gradle-plugin&metadataUrl=https%3A%2F%2Fplugins.gradle.org%2Fm2%2Fio%2Fgithub%2Fslimjar%2Fio.github.slimjar.gradle.plugin%2Fmaven-metadata.xml">
+        <img src="https://img.shields.io/maven-metadata/v.svg?label=gradle-plugin&metadataUrl=https%3A%2F%2Frepo.racci.dev%2Freleases%2Fdev%2Fracci%2Fslimjar%2Fdev.racci.slimjar.gradle.plugin%2Fmaven-metadata.xml">
     </a>
-    <a href="https://repo.vshnv.tech/releases/io/github/slimjar/slimjar">
-        <img src="https://img.shields.io/maven-metadata/v.svg?label=maven&metadataUrl=https%3A%2F%2Frepo.vshnv.tech%2Fio%2Fgithub%2Fslimjar%2Fslimjar%2Fmaven-metadata.xml">
+    <a href="https://repo.racci.dev/releases/dev/racci/releases/slimjar/slimjar/slimjar">
+        <img src="https://img.shields.io/maven-metadata/v.svg?label=maven&metadataUrl=https%3A%2F%2Frepo.racci.dev%2Freleases%2Fdev%2Fracci%2Fslimjar%2Fslimjar%2Fmaven-metadata.xml">
     </a>
   </div>
 
@@ -37,19 +37,19 @@ SlimJar makes the process of switching out jars easier by providing jars that ar
 ApplicationBuilder.appending("MyApplicationName").build()
 ```
 (NOTE: If you have specified relocations and are running in a IDE or any environment that does not use the shadowjar-ed build file, use the `ignoreRelocation` flag while running by using `-DignoreRelocation` in your runner arguments)
-*build.gradle* GROOVY DSL
-```groovy
+*build.gradle.kts*
+```kotlin
 plugins {
-  id 'com.github.johnrengelman.shadow' version '6.0.0'
-  id 'io.github.slimjar' version '1.3.0'
+  id("com.github.johnrengelman.shadow") version "7.1.2"
+  id("dev.racci.slimjar") version "1.3.2"
 }
 dependencies {
-  implementation slimjar("1.2.6")
-  slim 'group.id:artifact.id:version'
+  implementation slimjar("1.2.9")
+  slim("group.id:artifact.id:version")
 }
 
 slimJar {
-  relocate 'a.b.c', 'm.n.o'
+  relocate("a.b.c", "m.n.o")
 }
 ```
 
@@ -60,28 +60,28 @@ slimJar {
 <h2 align="center">Development setup</h2>
 
 
-```sh
-git clone https://github.com/SlimJar/slimjar.git
-gradlew test
+```shell
+git clone https://github.com/DaRacci/slimjar.git
+# or via
+gh repo clone DaRacci/slimjar
+
+cd slimjar && ./gradlew test
 ```
 <br>
 <br>
 <h2 align="center">Releases</h2>
 
-* https://plugins.gradle.org/plugin/io.github.slimjar
-* https://repo.vshnv.tech/releases/io/github/slimjar/slimjar/1.2.1
+* https://plugins.gradle.org/plugin/dev.racci.slimjar
+* https://repo.racci.dev/releases/dev/racci/slimjar/slimjar/1.2.9
 
-Distributed under the MIT license. See ``LICENSE`` for more information.
+Distributed under the MIT licence. See ``LICENSE`` for more information.
 
 <br>
 <br>
 <h2 align="center">Contributing</h2>
 
-
-
-1. Fork it (<https://github.com/SlimJar/slimjar/fork>)
+1. Fork it (<https://github.com/DaRacci/slimjar/fork>)
 2. Create your feature branch (`git checkout -b feature/abcd`)
 3. Commit your changes (`git commit -am 'Added some feature abcd'`)
 4. Push to the branch (`git push origin feature/fooBar`)
 5. Create a new Pull Request
-
