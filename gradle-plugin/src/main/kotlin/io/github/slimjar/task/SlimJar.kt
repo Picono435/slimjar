@@ -32,6 +32,7 @@ import io.github.slimjar.SLIM_API_CONFIGURATION_NAME
 import io.github.slimjar.SlimJarPlugin
 import io.github.slimjar.func.performCompileTimeResolution
 import io.github.slimjar.func.slimInjectToIsolated
+import io.github.slimjar.relocation.RelocationConfig
 import io.github.slimjar.relocation.RelocationRule
 import io.github.slimjar.resolver.CachingDependencyResolver
 import io.github.slimjar.resolver.ResolutionResult
@@ -49,8 +50,6 @@ import io.github.slimjar.resolver.strategy.MavenSnapshotPathResolutionStrategy
 import io.github.slimjar.resolver.strategy.MediatingPathResolutionStrategy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
@@ -59,9 +58,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.toCollection
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.selects.select
+import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -179,7 +177,6 @@ abstract class SlimJar @Inject constructor(
         }
     }
 
-    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     @TaskAction
     internal fun generateResolvedDependenciesFile() = with(project) {
         if (!project.performCompileTimeResolution) return@with
@@ -246,20 +243,20 @@ abstract class SlimJar @Inject constructor(
         return relocations
     }
 
-//    /**
-//     * Adds a relocation to the list, method had to be separated because Gradle doesn't support default values.
-//     */
-//    private fun addRelocation(
-//        original: String,
-//        relocated: String,
-//        configure: Action<RelocationConfig>? = null
-//    ): SlimJar {
-//        val relocationConfig = RelocationConfig()
-//        configure?.execute(relocationConfig)
-//        val rule = RelocationRule(original, relocated, relocationConfig.exclusions, relocationConfig.inclusions)
-//        relocations.add(rule)
-//        return this
-//    }
+    /**
+     * Adds a relocation to the list, method had to be separated because Gradle doesn't support default values.
+     */
+    private fun addRelocation(
+        original: String,
+        relocated: String,
+        configure: Action<RelocationConfig>? = null
+    ): SlimJar {
+        val relocationConfig = RelocationConfig()
+        configure?.execute(relocationConfig)
+        val rule = RelocationRule(original, relocated, relocationConfig.exclusions, relocationConfig.inclusions)
+        relocations.add(rule)
+        return this
+    }
 
     /**
      * Turns a [RenderableDependency] into a [Dependency] with all its transitives.

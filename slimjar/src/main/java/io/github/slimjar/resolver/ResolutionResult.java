@@ -34,7 +34,7 @@ public final class ResolutionResult {
     private final URL dependencyURL;
     private final URL checksumURL;
     private final boolean isAggregator;
-    private boolean checked;
+    private transient boolean checked;
 
     public ResolutionResult(
             final Repository repository,

@@ -31,9 +31,9 @@ import io.github.slimjar.resolver.strategy.MavenChecksumPathResolutionStrategy;
 import io.github.slimjar.resolver.strategy.PathResolutionStrategy;
 import java.net.URL;
 import java.util.Collections;
-import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 public class RepositoryEnquirerTest {
