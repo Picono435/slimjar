@@ -57,7 +57,7 @@ public final class SimpleDependencyInjector implements DependencyInjector {
 
     // TODO -> Download dependencies in parallel then check the checksums after instead of during the download
     private void injectDependencies(final Injectable injectable, final InjectionHelper injectionHelper, final Collection<Dependency> dependencies) throws RuntimeException {
-        dependencies.parallelStream()
+        dependencies.stream()
             .filter(dependency -> !injectionHelper.isInjected(dependency))
             .forEach(dependency -> {
                 if (processingDependencies.contains(dependency)) return;
@@ -82,4 +82,6 @@ public final class SimpleDependencyInjector implements DependencyInjector {
             }
         );
     }
+
+
 }

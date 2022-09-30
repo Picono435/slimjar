@@ -134,12 +134,8 @@ public abstract class ApplicationBuilder {
      * Creates an ApplicationBuilder that allows loading into current classloader.
      * @param name Name of your application/project. This exists to uniquely identify relocations.
      * @return ApplicationBuilder that allows loading into current classloader.
-     * @throws URISyntaxException on invalid download path
-     * @throws ReflectiveOperationException on attempting to use wrong appender, possible due to unexpected result in jvm version detection
-     * @throws NoSuchAlgorithmException on Selected/Default digest algorithm not existing.
-     * @throws IOException on File IO failure
      */
-    public static ApplicationBuilder appending(final String name) throws URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException, IOException {
+    public static ApplicationBuilder appending(final String name) {
         return InjectingApplicationBuilder.createAppending(name);
     }
 
