@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("com.github.johnrengelman.shadow") version "6.1.0"
+    alias(libs.plugins.shadow)
     `maven-publish`
     `java-gradle-plugin`
     alias(libs.plugins.kotlin)
@@ -27,9 +27,9 @@ dependencies {
 
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())
-    compileOnly("com.github.jengelman.gradle.plugins:shadow:6.1.0")
+    compileOnly(libs.gradle.shadow)
 
-    testImplementation("com.github.jengelman.gradle.plugins:shadow:6.1.0")
+    testImplementation(libs.gradle.shadow)
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation(gradleApi())
     testImplementation(gradleKotlinDsl())
