@@ -6,8 +6,6 @@ plugins {
     `maven-publish`
 }
 
-version = "1.2.11"
-
 dependencies {
     testImplementation("me.lucko:jar-relocator:1.5")
     testImplementation("com.google.code.gson:gson:2.9.1")

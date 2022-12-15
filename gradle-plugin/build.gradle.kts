@@ -10,8 +10,6 @@ plugins {
     id("com.gradle.plugin-publish") version "0.21.0"
 }
 
-version = "1.3.3"
-
 repositories {
     maven("https://plugins.gradle.org/m2/")
 }
