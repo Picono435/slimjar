@@ -32,7 +32,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import org.junit.jupiter.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class MirrorSelectorTest {
 //    @Test

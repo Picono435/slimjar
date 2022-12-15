@@ -25,7 +25,6 @@
 package io.github.slimjar.resolver.reader;
 
 import io.github.slimjar.resolver.data.Repository;
-import io.github.slimjar.resolver.mirrors.SimpleMirrorSelector;
 import io.github.slimjar.resolver.reader.dependency.*;
 import io.github.slimjar.resolver.reader.facade.ReflectiveGsonFacadeFactory;
 
@@ -39,7 +38,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Collections;
 import org.junit.jupiter.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DependencyDataProviderFactoryTest {
     private static final Path DEFAULT_DOWNLOAD_DIRECTORY;
@@ -57,7 +56,7 @@ public class DependencyDataProviderFactoryTest {
     }
 
     @Test
-    public void testCreateFactory() throws IOException, URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException {
+    public void testCreateFactory() throws IOException, URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException, InterruptedException {
         final URL url = new URL("https://a.b.c");
         final DependencyDataProviderFactory dependencyDataProviderFactory = new GsonDependencyDataProviderFactory(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS));
         final DependencyDataProvider provider = dependencyDataProviderFactory.create(url);
@@ -66,7 +65,7 @@ public class DependencyDataProviderFactoryTest {
     }
 
     @Test
-    public void testCreateFileDataProviderFactory() throws IOException, URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException {
+    public void testCreateFileDataProviderFactory() throws IOException, URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException, InterruptedException {
         final URL url = new URL("https://a.b.c");
         final DependencyDataProviderFactory dependencyDataProviderFactory = new GsonDependencyDataProviderFactory(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS));
         final DependencyDataProvider provider = dependencyDataProviderFactory.create(url);
@@ -75,7 +74,7 @@ public class DependencyDataProviderFactoryTest {
     }
 
     @Test
-    public void testCreateModuleDataProviderFactory() throws IOException, URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException {
+    public void testCreateModuleDataProviderFactory() throws IOException, URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException, InterruptedException {
         final URL url = new URL("https://a.b.c");
 
         final DependencyDataProviderFactory dependencyDataProviderFactory = new ExternalDependencyDataProviderFactory(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS));

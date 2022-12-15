@@ -26,7 +26,6 @@ package io.github.slimjar.resolver.strategy;
 
 import io.github.slimjar.resolver.data.Dependency;
 import io.github.slimjar.resolver.data.Repository;
-import junit.framework.TestCase;
 
 import java.net.MalformedURLException;
 import java.net.URL;

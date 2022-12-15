@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.net.HttpURLConnection;
@@ -116,7 +116,7 @@ public class ModuleDependencyDataProviderTest {
     private ModuleDependencyDataProvider createProvider(
         final URL url,
         final Object jarURLConnection
-    ) throws IOException, ReflectiveOperationException, NoSuchAlgorithmException, URISyntaxException {
+    ) throws IOException, ReflectiveOperationException, NoSuchAlgorithmException, URISyntaxException, InterruptedException {
         final var mockProvider = Mockito.mock(ModuleDependencyDataProvider.class, Mockito.withSettings().useConstructor(new GsonDependencyReader(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS).createFacade()), url));
 
         Mockito.doReturn(url).when(mockProvider).getURL();

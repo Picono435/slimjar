@@ -40,7 +40,7 @@ import java.net.URLConnection;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 

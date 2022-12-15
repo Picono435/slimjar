@@ -34,7 +34,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;

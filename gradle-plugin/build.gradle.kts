@@ -31,6 +31,9 @@ dependencies {
 
     testImplementation("com.github.jengelman.gradle.plugins:shadow:6.1.0")
     testImplementation("org.assertj:assertj-core:3.23.1")
+    testImplementation(gradleApi())
+    testImplementation(gradleKotlinDsl())
+    testImplementation(gradleTestKit())
 
     // For grade log4j checker.
     configurations.onEach {
