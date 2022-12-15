@@ -1,14 +1,13 @@
 // Workaround for (https://youtrack.jetbrains.com/issue/KTIJ-19369)
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-//    alias(libs.plugins)
-    id("com.github.johnrengelman.shadow") version "7.1.2"
+    alias(libs.plugins.shadow)
     `maven-publish`
 }
 
 dependencies {
     testImplementation("me.lucko:jar-relocator:1.5")
-    testImplementation("com.google.code.gson:gson:2.9.1")
+    testImplementation("com.google.code.gson:gson:2.10")
     testImplementation("org.mockito:mockito-core:4.8.0")
     testImplementation("org.mockito:mockito-inline:4.8.0")
     testImplementation("cglib:cglib:3.3.0")
