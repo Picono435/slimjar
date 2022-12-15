@@ -5,7 +5,7 @@ import java.net.URI
 plugins {
     java
     alias(libs.plugins.kotlin)
-    id("com.github.hierynomus.license-base") version "0.15.0"
+    id("com.github.hierynomus.license-base") version "0.16.1"
 }
 
 allprojects {
