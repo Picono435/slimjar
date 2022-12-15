@@ -1,8 +1,8 @@
-package io.github.slimjar
+package io.github.slimjar // ktlint-disable filename
 
 import groovy.lang.Closure
 
-inline fun Any.asGroovyClosure(default: String, crossinline func: (arg: String) -> String): (String) -> String =
+public inline fun Any.asGroovyClosure(default: String, crossinline func: (arg: String) -> String): (String) -> String =
     object : Closure<String>(this), (String) -> String, () -> String {
         fun doCall(arg: String) = func(arg)
         fun doCall() = doCall(default)

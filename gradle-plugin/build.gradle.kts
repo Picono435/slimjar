@@ -3,13 +3,11 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    `java-gradle-plugin`
-    `kotlin-dsl`
-    groovy
-    kotlin("jvm") version "1.7.10"
-    id("com.gradle.plugin-publish") version "0.21.0"
-    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("com.github.johnrengelman.shadow") version "6.1.0"
     `maven-publish`
+    `java-gradle-plugin`
+    alias(libs.plugins.kotlin)
+    id("com.gradle.plugin-publish") version "0.21.0"
 }
 
 version = "1.3.3"
@@ -24,22 +22,24 @@ configurations["testImplementation"].extendsFrom(shadowImplementation)
 
 dependencies {
 
-    shadowImplementation(kotlin("stdlib"))
+    shadowImplementation(libs.kotlin.stdlib)
     shadowImplementation(project(":slimjar"))
-    shadowImplementation("com.google.code.gson:gson:2.9.1")
-    shadowImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    shadowImplementation("com.google.code.gson:gson:2.10")
+    shadowImplementation(libs.kotlinx.coroutines)
 
+    compileOnly(gradleApi())
+    compileOnly(gradleKotlinDsl())
     compileOnly("com.github.jengelman.gradle.plugins:shadow:6.1.0")
 
     testImplementation("com.github.jengelman.gradle.plugins:shadow:6.1.0")
     testImplementation("org.assertj:assertj-core:3.23.1")
 
     // For grade log4j checker.
-//    configurations.onEach {
-//        it.exclude(group = "org.apache.logging.log4j", module = "log4j-core")
-//        it.exclude(group = "org.apache.logging.log4j", module = "log4j-api")
-//        it.exclude(group = "org.apache.logging.log4j", module = "log4j-slf4j-impl")
-//    }
+    configurations.onEach {
+        it.exclude(group = "org.apache.logging.log4j", module = "log4j-core")
+        it.exclude(group = "org.apache.logging.log4j", module = "log4j-api")
+        it.exclude(group = "org.apache.logging.log4j", module = "log4j-slf4j-impl")
+    }
 }
 
 val shadowJarTask = tasks.named("shadowJar", ShadowJar::class.java)
@@ -51,6 +51,10 @@ shadowJarTask.configure {
     dependsOn(relocateShadowJar)
     archiveClassifier.set("")
     configurations = listOf(shadowImplementation)
+}
+
+kotlin {
+    explicitApi()
 }
 
 // Required for plugin substitution to work in sample projects.

@@ -1,4 +1,7 @@
+// Workaround for (https://youtrack.jetbrains.com/issue/KTIJ-19369)
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
+//    alias(libs.plugins)
     id("com.github.johnrengelman.shadow") version "7.1.2"
     `maven-publish`
 }

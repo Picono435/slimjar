@@ -35,7 +35,7 @@ import org.gradle.internal.Cast.uncheckedCast
 /**
  * Adds `slim` configuration for Kotlin dsl with options
  */
-fun DependencyHandler.slim(
+public fun DependencyHandler.slim(
     dependencyNotation: String,
     dependencyOptions: Action<ExternalModuleDependency>
 ): ExternalModuleDependency? {
@@ -45,7 +45,7 @@ fun DependencyHandler.slim(
 /**
  * Adds `slimApi` configuration for Kotlin dsl with options
  */
-fun DependencyHandler.slimApi(
+public fun DependencyHandler.slimApi(
     dependencyNotation: String,
     dependencyOptions: Action<ExternalModuleDependency>
 ): ExternalModuleDependency? {
@@ -55,12 +55,12 @@ fun DependencyHandler.slimApi(
 /**
  * Alternative for adding `slim` configuration for Kotlin dsl but without options
  */
-fun DependencyHandler.slim(dependencyNotation: Any): Dependency? = add(SLIM_CONFIGURATION_NAME, dependencyNotation)
+public fun DependencyHandler.slim(dependencyNotation: Any): Dependency? = add(SLIM_CONFIGURATION_NAME, dependencyNotation)
 
 /**
  * Alternative for adding `slimApi` configuration for Kotlin dsl but without options
  */
-fun DependencyHandler.slimApi(dependencyNotation: Any): Dependency? =
+public fun DependencyHandler.slimApi(dependencyNotation: Any): Dependency? =
     add(SLIM_API_CONFIGURATION_NAME, dependencyNotation)
 
 /**

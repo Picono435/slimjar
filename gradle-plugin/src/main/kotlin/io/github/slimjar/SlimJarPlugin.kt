@@ -31,15 +31,18 @@ import io.github.slimjar.task.SlimJar
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.exclude
+import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.include
 import org.gradle.kotlin.dsl.extra
+import org.gradle.kotlin.dsl.withType
 
-const val SLIM_CONFIGURATION_NAME = "slim"
-const val SLIM_API_CONFIGURATION_NAME = "slimApi"
-const val SLIM_JAR_TASK_NAME = "slimJar"
+public const val SLIM_CONFIGURATION_NAME: String = "slim"
+public const val SLIM_API_CONFIGURATION_NAME: String = "slimApi"
+public const val SLIM_JAR_TASK_NAME: String = "slimJar"
 private const val RESOURCES_TASK = "processResources"
 private const val SHADOW_ID = "com.github.johnrengelman.shadow"
 
-class SlimJarPlugin : Plugin<Project> {
+public class SlimJarPlugin : Plugin<Project> {
 
     override fun apply(project: Project): Unit = with(project) {
         // Applies Java if not present, since it's required for the compileOnly configuration
@@ -48,6 +51,8 @@ class SlimJarPlugin : Plugin<Project> {
         if (!plugins.hasPlugin(SHADOW_ID)) {
             throw ShadowNotFoundException("SlimJar depends on the Shadow plugin, please apply the plugin. For more information visit: https://imperceptiblethoughts.com/shadow/")
         }
+
+        extensions.create("slimJar", SlimJarExtension::class.java, this, this@SlimJarPlugin)
 
         val slimConfig = createConfig(
             SLIM_CONFIGURATION_NAME,
@@ -68,12 +73,13 @@ class SlimJarPlugin : Plugin<Project> {
             asGroovyClosure("+") { version -> slimJarLib(version) }
         )
         // Hooks into shadow to inject relocations
-        val shadowTask = tasks.withType(ShadowJar::class.java).firstOrNull() ?: return
-        shadowTask.doFirst {
-            slimJar.relocations().forEach { rule ->
-                shadowTask.relocate(rule.originalPackagePattern, rule.relocatedPackagePattern) {
-                    rule.inclusions.forEach { include(it) }
-                    rule.exclusions.forEach { exclude(it) }
+        tasks.withType<ShadowJar>() {
+            doFirst { _ ->
+                slimExtension.relocations.forEach { rule ->
+                    relocate(rule.originalPackagePattern, rule.relocatedPackagePattern) {
+                        rule.inclusions.forEach { include(it) }
+                        rule.exclusions.forEach { exclude(it) }
+                    }
                 }
             }
         }
