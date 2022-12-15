@@ -52,7 +52,7 @@ public class SlimJarPlugin : Plugin<Project> {
             throw ShadowNotFoundException("SlimJar depends on the Shadow plugin, please apply the plugin. For more information visit: https://imperceptiblethoughts.com/shadow/")
         }
 
-        extensions.create("slimJar", SlimJarExtension::class.java, this, this@SlimJarPlugin)
+        extensions.create("slimJar", SlimJarExtension::class.java)
 
         val slimConfig = createConfig(
             SLIM_CONFIGURATION_NAME,
