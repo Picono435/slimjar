@@ -218,7 +218,7 @@ abstract class SlimJar @Inject constructor(
                     preResolved[it.toString()]?.let { pre ->
                         repositories.none { r -> pre.repository.url().toString() == r.url().toString() }
                     } ?: true
-                }.concurrentMap(this, 32) {
+                }.concurrentMap(this, 16) {
                     it.toString() to resolver.resolve(it).orElse(null)
                 }.onEach { result[it.first] = it.second }.collect()
         }
