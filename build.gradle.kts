@@ -1,7 +1,10 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinBasePlugin
 import java.net.URI
 
 plugins {
     java
+    alias(libs.plugins.kotlin)
     id("com.github.hierynomus.license-base") version "0.15.0"
 }
 
@@ -18,6 +21,13 @@ allprojects {
         includes(listOf("**/*.java', '**/*.kt"))
         mapping("kt", "DOUBLESLASH_STYLE")
         mapping("java", "DOUBLESLASH_STYLE")
+    }
+
+    plugins.withType<KotlinBasePlugin> {
+        extensions.configure<KotlinProjectExtension> {
+            jvmToolchain(17)
+            explicitApi()
+        }
     }
 
     dependencies {
