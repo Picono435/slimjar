@@ -62,9 +62,7 @@ import org.gradle.api.artifacts.ResolvableDependencies
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -86,16 +84,12 @@ public abstract class SlimJar @Inject constructor(
         val gson: Gson = GsonBuilder().setPrettyPrinting().create()
     }
 
-    @get:Input
-    @get:Optional
-    public val incomingDependencies: ResolvableDependencies? = project.configurations.findByName(SLIM_API_CONFIGURATION_NAME)?.incoming
-
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    public val buildDirectory: File = project.buildDir.relativeTo(project.rootDir)
+    public val buildDirectory: File = project.buildDir
 
     @get:OutputDirectory
-    public val shadowWriteFolder: File = project.buildDir.resolve("resources/main/")
+    public val shadowWriteFolder: File = buildDirectory.resolve("resources/main/")
 
     @get:OutputDirectory
     public val outputDirectory: File = buildDirectory.resolve("resources/slimjar/")
@@ -103,6 +97,8 @@ public abstract class SlimJar @Inject constructor(
     init {
         group = "slimJar"
         inputs.files(config)
+
+        dependsOn(project.tasks.targetedJarTask)
     }
 
     /**
@@ -115,7 +111,7 @@ public abstract class SlimJar @Inject constructor(
         val extension = extensions.getByType<SlimJarExtension>()
 
         // If api config is present map dependencies from it as well.
-        incomingDependencies?.getSlimDependencies()?.toCollection(dependencies)
+        project.configurations.findByName(SLIM_API_CONFIGURATION_NAME)?.incoming?.getSlimDependencies()?.toCollection(dependencies)
 
         if (!outputDirectory.exists()) outputDirectory.mkdirs()
 
@@ -135,7 +131,7 @@ public abstract class SlimJar @Inject constructor(
     internal fun includeIsolatedJars() = with(project) {
         val extension = extensions.getByType<SlimJarExtension>()
         extension.isolatedProjects.filter { it != this }.forEach {
-            it.tasks.targetedJarTask {
+            it.tasks.targetedJarTask.apply {
                 val archive = outputs.files.singleFile
                 if (!outputDirectory.exists()) outputDirectory.mkdirs()
                 val output = File(outputDirectory, "${it.name}.isolated-jar")
