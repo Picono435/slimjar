@@ -89,9 +89,6 @@ public abstract class SlimJar @Inject constructor(
     public val buildDirectory: File = project.buildDir
 
     @get:OutputDirectory
-    public val shadowWriteFolder: File = buildDirectory.resolve("resources/main/")
-
-    @get:OutputDirectory
     public val outputDirectory: File = buildDirectory.resolve("resources/slimjar/")
 
     init {
@@ -121,9 +118,7 @@ public abstract class SlimJar @Inject constructor(
             gson.toJson(DependencyData(extension.mirrors, repositories, dependencies, extension.relocations), it)
         }
 
-        // Copies to shadow's main folder
-        if (!shadowWriteFolder.exists()) shadowWriteFolder.mkdirs()
-        file.copyTo(File(shadowWriteFolder, file.name), true)
+        withShadowTask { from(file) }
     }
 
     // Finds jars to be isolated and adds them to the final jar.
@@ -137,9 +132,7 @@ public abstract class SlimJar @Inject constructor(
                 val output = File(outputDirectory, "${it.name}.isolated-jar")
                 archive.copyTo(output, true)
 
-                // Copies to shadow's main folder
-                if (!shadowWriteFolder.exists()) shadowWriteFolder.mkdirs()
-                output.copyTo(File(shadowWriteFolder, output.name), true)
+                withShadowTask { from(output) }
             }
         }
     }
@@ -198,9 +191,7 @@ public abstract class SlimJar @Inject constructor(
             gson.toJson(result, it)
         }
 
-        // Copies to shadow's main folder
-        if (shadowWriteFolder.exists().not()) shadowWriteFolder.mkdirs()
-        file.copyTo(File(shadowWriteFolder, file.name), true)
+        withShadowTask { from(file) }
     }
 
     /**
@@ -263,4 +254,8 @@ public abstract class SlimJar @Inject constructor(
         .map { scope.async { transform(it) } }
         .buffer(concurrencyLevel)
         .map { it.await() }
+
+    protected open fun withShadowTask(
+        action: ShadowJar.() -> Unit
+    ): ShadowJar? = (project.tasks.findByName(maybePrefix(null, null, "shadowJar")) as? ShadowJar)?.apply(action)
 }
