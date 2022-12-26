@@ -3,7 +3,7 @@ package io.github.slimjar // ktlint-disable filename
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskContainer
-import org.gradle.kotlin.dsl.* // ktlint-disable no-wildcard-imports
+import org.gradle.kotlin.dsl.getByType
 
 internal val TaskContainer.targetedJarTask: Task get() {
     return findByName("reobfJar")
