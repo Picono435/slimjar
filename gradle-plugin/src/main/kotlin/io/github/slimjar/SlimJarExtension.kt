@@ -25,7 +25,7 @@ public abstract class SlimJarExtension(project: Project) {
      * When set the global repository will be the only used repository,
      */
     public val globalRepository: Property<String> = project.objects.property(String::class.java)
-        .apply(Property<*>::disallowChanges)
+        .apply(Property<*>::finalizeValueOnRead)
 
     /**
      * Contracts that when building the slimjar, all dependencies must be resolved and there is no ambiguity.
@@ -34,7 +34,7 @@ public abstract class SlimJarExtension(project: Project) {
      * Defaults to false.
      */
     public val requirePreResolve: Property<Boolean> = project.objects.property(Boolean::class.java)
-        .convention(false).apply(Property<*>::disallowChanges)
+        .convention(false).apply(Property<*>::finalizeValueOnRead)
 
     /**
      * Contracts that when building the slimjar, all pre-resolved dependencies must have a valid checksum.
@@ -42,7 +42,7 @@ public abstract class SlimJarExtension(project: Project) {
      * Defaults to false.
      */
     public val requireChecksum: Property<Boolean> = project.objects.property(Boolean::class.java)
-        .convention(false).apply(Property<*>::disallowChanges)
+        .convention(false).apply(Property<*>::finalizeValueOnRead)
 
     /**
      * @receiver the original path
