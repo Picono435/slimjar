@@ -182,9 +182,9 @@ public abstract class SlimJar @Inject constructor(
             }
 
             dependencies.asFlow()
-                .filter {
+                .filter { dep ->
                     // TODO: Ensure existing results match global if present
-                    preResolved[it.toString()]?.let { pre ->
+                    preResolved[dep.toString()]?.let { pre ->
                         repositories.none { r -> pre.repository.url().toString() == r.url().toString() }
                     } ?: true
                 }.concurrentMap(this, 16) { dep ->
@@ -281,8 +281,10 @@ public abstract class SlimJar @Inject constructor(
         .toSet()
         .map { Repository(it.url.toURL()) }
 
-    private fun ResolvableDependencies.getSlimDependencies(): List<Dependency> = RenderableModuleResult(this.resolutionResult.root)
-        .children.mapNotNull { it.toSlimDependency() }
+    private fun ResolvableDependencies.getSlimDependencies(): List<Dependency> =
+        RenderableModuleResult(this.resolutionResult.root).children
+            .mapNotNull { it.toSlimDependency() }
+            .filterNot { it.artifactId().endsWith("-bom") }
 
     private fun Collection<Dependency>.flatten(): MutableSet<Dependency> {
         return this.flatMap { it.transitive().flatten() + it }.toMutableSet()
