@@ -71,6 +71,11 @@ public record PingingRepositoryEnquirer(
         );
     }
 
+    @Override
+    public String toString() {
+        return repository.url().toString();
+    }
+
     private URL createURL(final String path) {
         try {
             return new URL(path);

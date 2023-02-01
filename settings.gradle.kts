@@ -21,9 +21,9 @@ dependencyResolutionManagement {
     }
 
     versionCatalogs.create("libs") {
-        val minixVersion: String by settings
         val kotlinVersion: String by settings
-        val conventions = kotlinVersion.plus("-").plus(minixVersion.substringAfterLast('.'))
+        val build: String by settings
+        val conventions = kotlinVersion.plus("-").plus(build)
         from("dev.racci:catalog:$conventions")
     }
 }

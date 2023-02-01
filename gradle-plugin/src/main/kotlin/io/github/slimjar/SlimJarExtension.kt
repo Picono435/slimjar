@@ -8,14 +8,41 @@ import io.github.slimjar.resolver.data.Mirror
 import io.github.slimjar.task.SlimJar
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.* // ktlint-disable no-wildcard-imports
 
-public abstract class SlimJarExtension {
+public abstract class SlimJarExtension(project: Project) {
+
     @Transient internal val relocations = mutableSetOf<RelocationRule>()
 
     @Transient internal val mirrors = mutableSetOf<Mirror>()
 
     @Transient internal val isolatedProjects = mutableSetOf<Project>()
+
+    /**
+     * Sets a global repository that will be used to resolve dependencies,
+     * If not set each dependency will attempt to resolve from one of the projects repositories.
+     * When set the global repository will be the only used repository,
+     */
+    public val globalRepository: Property<String> = project.objects.property(String::class.java)
+        .apply(Property<*>::disallowChanges)
+
+    /**
+     * Contracts that when building the slimjar, all dependencies must be resolved and there is no ambiguity.
+     * If any dependency is not found in the global repository, the build will fail.
+     *
+     * Defaults to false.
+     */
+    public val requirePreResolve: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .convention(false).apply(Property<*>::disallowChanges)
+
+    /**
+     * Contracts that when building the slimjar, all pre-resolved dependencies must have a valid checksum.
+     *
+     * Defaults to false.
+     */
+    public val requireChecksum: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .convention(false).apply(Property<*>::disallowChanges)
 
     /**
      * @receiver the original path

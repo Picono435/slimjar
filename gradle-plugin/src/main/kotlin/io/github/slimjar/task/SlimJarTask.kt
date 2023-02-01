@@ -24,6 +24,7 @@
 
 package io.github.slimjar.task
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -73,11 +74,13 @@ import org.gradle.kotlin.dsl.* // ktlint-disable no-wildcard-imports
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
+import java.net.URL
 import javax.inject.Inject
 
 @CacheableTask
 public abstract class SlimJar @Inject constructor(
-    @Transient private val config: Configuration
+    @Transient private val config: Configuration,
+    @Transient private val extension: SlimJarExtension
 ) : DefaultTask() {
 
     private companion object {
@@ -171,24 +174,63 @@ public abstract class SlimJar @Inject constructor(
             mapOf()
         )
 
-        val result = mutableMapOf<String, ResolutionResult>()
+        val results = mutableMapOf<String, ResolutionResult>()
+        // TODO: Cleanup this mess
         runBlocking(IO) {
+            val globalRepositoryEnquirer = extension.globalRepository.map { repoString ->
+                enquirerFactory.create(Repository(URL(repoString)))
+            }
+
             dependencies.asFlow()
                 .filter {
+                    // TODO: Ensure existing results match global if present
                     preResolved[it.toString()]?.let { pre ->
                         repositories.none { r -> pre.repository.url().toString() == r.url().toString() }
                     } ?: true
-                }.concurrentMap(this, 16) {
-                    it.toString() to resolver.resolve(it).orElse(null)
-                }.onEach { result[it.first] = it.second }.collect()
+                }.concurrentMap(this, 16) { dep ->
+                    dep to if (globalRepositoryEnquirer.isPresent) {
+                        resolver.resolve(dep, globalRepositoryEnquirer.get())
+                    } else {
+                        resolver.resolve(dep)
+                    }
+                }.filter { (dep, result) ->
+                    if (result.isEmpty) {
+                        logger.warn("Failed to resolve dependency $dep")
+                        if (extension.requirePreResolve.get()) {
+                            error(
+                                """
+                                Failed to resolve dependency $dep during pre-resolve.
+                                Please ensure that the dependency is available in the global repository.
+                                Or disable required pre-resolve in the slimJar extension.
+                                """.trimIndent()
+                            )
+                        }
+
+                        return@filter false
+                    }
+
+                    true
+                }.map { (dep, result) ->
+                    dep to result.get()
+                }.onEach { (dep, result) ->
+                    if (!extension.requireChecksum.get() || result.checksumURL != null) return@onEach
+                    logger.warn("Failed to resolve checksum for dependency $dep")
+                    error(
+                        """
+                            Failed to resolve checksum for dependency $dep during pre-resolve.
+                            Please ensure that the dependency has a checksum.
+                            Or disable required checksum in the slimJar extension.
+                        """.trimIndent()
+                    )
+                }.onEach { (dep, result) -> results[dep.toString()] = result }.collect()
         }
 
-        preResolved.forEach { result.putIfAbsent(it.key, it.value) }
+        preResolved.forEach { results.putIfAbsent(it.key, it.value) }
 
         if (!outputDirectory.exists()) outputDirectory.mkdirs()
 
         FileWriter(file).use {
-            gson.toJson(result, it)
+            gson.toJson(results, it)
         }
 
         withShadowTask { from(file) }
@@ -257,5 +299,5 @@ public abstract class SlimJar @Inject constructor(
 
     protected open fun withShadowTask(
         action: ShadowJar.() -> Unit
-    ): ShadowJar? = (project.tasks.findByName(maybePrefix(null, null, "shadowJar")) as? ShadowJar)?.apply(action)
+    ): ShadowJar? = (project.tasks.findByName("shadowJar") as? ShadowJar)?.apply(action)
 }

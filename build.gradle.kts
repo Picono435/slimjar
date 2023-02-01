@@ -4,7 +4,7 @@ import java.net.URI
 
 plugins {
     java
-    alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlin.jvm)
     id("com.github.hierynomus.license-base") version "0.16.1"
 }
 
@@ -31,7 +31,7 @@ allprojects {
     }
 
     dependencies {
-        implementation(kotlin("bom:${rootProject.libs.versions.kotlin.get()}")) // Keep kotlin versions in sync.
+//        implementation(kotlin("bom:${rootProject.libs.versions.kotlin.get()}")) // Keep kotlin versions in sync.
 
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")

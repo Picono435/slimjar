@@ -55,22 +55,38 @@ public final class CachingDependencyResolver implements DependencyResolver {
 
     @Override
     public Optional<ResolutionResult> resolve(final Dependency dependency) {
-        return Optional.ofNullable(cachedResults.computeIfAbsent(dependency, this::attemptResolve));
+        return Optional.ofNullable(cachedResults.computeIfAbsent(dependency, dep -> attemptResolve(dep, null)));
     }
 
-    private ResolutionResult attemptResolve(final Dependency dependency) {
+    public Optional<ResolutionResult> resolve(
+        final Dependency dependency,
+        final RepositoryEnquirer enforcedRepository
+    ) { return Optional.ofNullable(cachedResults.computeIfAbsent(dependency, dep -> attemptResolve(dep, enforcedRepository))); }
+
+    private ResolutionResult attemptResolve(
+        final Dependency dependency,
+        final RepositoryEnquirer enforcedRepository
+    ) {
         final var preResolvedResult = preResolvedResults.get(dependency.toString()) != null ? preResolvedResults.get(dependency.toString()) : cachedResults.get(dependency);
 
         if (preResolvedResult != null) {
             if (preResolvedResult.isChecked()) return preResolvedResult;
             if (preResolvedResult.isAggregator()) return preResolvedResult;
 
-            final var isDependencyValid = urlPinger.ping(preResolvedResult.getDependencyURL());
+            final var isDependencyValid = (enforcedRepository == null || enforcedRepository.toString().equals(preResolvedResult.getRepository().url().toString())) && urlPinger.ping(preResolvedResult.getDependencyURL());
             final var isChecksumValid = preResolvedResult.getChecksumURL() == null || urlPinger.ping(preResolvedResult.getChecksumURL());
 
             if (isDependencyValid && isChecksumValid) {
                 preResolvedResult.setChecked();
                 return preResolvedResult;
+            }
+        }
+
+        if (enforcedRepository != null) {
+            final var result = enforcedRepository.enquire(dependency);
+            if (result == null) {
+                LOGGER.log("%s Failed to resolve dependency %s from the enforced repository %s", FAILED_RESOLUTION_MESSAGE, dependency.toString(), enforcedRepository.toString());
+                return null;
             }
         }
 

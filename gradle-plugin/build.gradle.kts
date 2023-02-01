@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.shadow)
     `maven-publish`
     `java-gradle-plugin`
-    alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlin.jvm)
     id("com.gradle.plugin-publish") version "1.1.0"
 }
 
