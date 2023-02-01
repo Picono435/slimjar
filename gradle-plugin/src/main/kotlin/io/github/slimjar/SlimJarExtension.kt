@@ -9,6 +9,7 @@ import io.github.slimjar.task.SlimJar
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
 import org.gradle.kotlin.dsl.* // ktlint-disable no-wildcard-imports
 
 public abstract class SlimJarExtension(project: Project) {
@@ -20,12 +21,13 @@ public abstract class SlimJarExtension(project: Project) {
     @Transient internal val isolatedProjects = mutableSetOf<Project>()
 
     /**
-     * Sets a global repository that will be used to resolve dependencies,
+     * Sets a global repositories that will be used to resolve dependencies,
      * If not set each dependency will attempt to resolve from one of the projects repositories.
-     * When set the global repository will be the only used repository,
+     *
+     * When set the global repositories will be the only used repositories.
      */
-    public val globalRepository: Property<String> = project.objects.property(String::class.java)
-        .apply(Property<*>::finalizeValueOnRead)
+    public val globalRepositories: SetProperty<String> = project.objects.setProperty<String>()
+        .apply(SetProperty<*>::finalizeValueOnRead)
 
     /**
      * Contracts that when building the slimjar, all dependencies must be resolved and there is no ambiguity.

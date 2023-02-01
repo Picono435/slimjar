@@ -55,17 +55,17 @@ public final class CachingDependencyResolver implements DependencyResolver {
 
     @Override
     public Optional<ResolutionResult> resolve(final Dependency dependency) {
-        return Optional.ofNullable(cachedResults.computeIfAbsent(dependency, dep -> attemptResolve(dep, null)));
+        return Optional.ofNullable(cachedResults.computeIfAbsent(dependency, dep -> attemptResolve(dep, Collections.emptyList())));
     }
 
     public Optional<ResolutionResult> resolve(
         final Dependency dependency,
-        final RepositoryEnquirer enforcedRepository
-    ) { return Optional.ofNullable(cachedResults.computeIfAbsent(dependency, dep -> attemptResolve(dep, enforcedRepository))); }
+        final List<RepositoryEnquirer> enforcedRepositories
+    ) { return Optional.ofNullable(cachedResults.computeIfAbsent(dependency, dep -> attemptResolve(dep, enforcedRepositories))); }
 
     private ResolutionResult attemptResolve(
         final Dependency dependency,
-        final RepositoryEnquirer enforcedRepository
+        final List<RepositoryEnquirer> enforcedRepositories
     ) {
         final var preResolvedResult = preResolvedResults.get(dependency.toString()) != null ? preResolvedResults.get(dependency.toString()) : cachedResults.get(dependency);
 
@@ -73,7 +73,8 @@ public final class CachingDependencyResolver implements DependencyResolver {
             if (preResolvedResult.isChecked()) return preResolvedResult;
             if (preResolvedResult.isAggregator()) return preResolvedResult;
 
-            final var isDependencyValid = (enforcedRepository == null || enforcedRepository.toString().equals(preResolvedResult.getRepository().url().toString())) && urlPinger.ping(preResolvedResult.getDependencyURL());
+            final var preResolvedUrl = preResolvedResult.getRepository().url().toString();
+            final var isDependencyValid = (enforcedRepositories.isEmpty() || enforcedRepositories.stream().anyMatch(repo -> repo.toString().equals(preResolvedUrl))) && urlPinger.ping(preResolvedResult.getDependencyURL());
             final var isChecksumValid = preResolvedResult.getChecksumURL() == null || urlPinger.ping(preResolvedResult.getChecksumURL());
 
             if (isDependencyValid && isChecksumValid) {
@@ -82,15 +83,8 @@ public final class CachingDependencyResolver implements DependencyResolver {
             }
         }
 
-        if (enforcedRepository != null) {
-            final var result = enforcedRepository.enquire(dependency);
-            if (result == null) {
-                LOGGER.log("%s Failed to resolve dependency %s from the enforced repository %s", FAILED_RESOLUTION_MESSAGE, dependency.toString(), enforcedRepository.toString());
-                return null;
-            }
-        }
-
-        final var result = repositories.stream().parallel()
+        final var usedRepositories = enforcedRepositories.isEmpty() ? repositories : enforcedRepositories;
+        final var result = usedRepositories.stream().parallel()
                 .map(repositoryEnquirer -> repositoryEnquirer.enquire(dependency))
                 .filter(Objects::nonNull)
                 .findFirst();

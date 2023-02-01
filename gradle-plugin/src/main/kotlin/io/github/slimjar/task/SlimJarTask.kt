@@ -177,8 +177,8 @@ public abstract class SlimJar @Inject constructor(
         val results = mutableMapOf<String, ResolutionResult>()
         // TODO: Cleanup this mess
         runBlocking(IO) {
-            val globalRepositoryEnquirer = extension.globalRepository.map { repoString ->
-                enquirerFactory.create(Repository(URL(repoString)))
+            val globalRepositoryEnquirer = extension.globalRepositories.map { repos ->
+                repos.map { repoString -> enquirerFactory.create(Repository(URL(repoString))) }
             }
 
             dependencies.asFlow()
