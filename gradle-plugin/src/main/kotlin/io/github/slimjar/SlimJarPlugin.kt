@@ -50,7 +50,7 @@ public class SlimJarPlugin : Plugin<Project> {
             throw ShadowNotFoundException("SlimJar depends on the Shadow plugin, please apply the plugin. For more information visit: https://imperceptiblethoughts.com/shadow/")
         }
 
-        extensions.create("slimJar", SlimJarExtension::class.java, project)
+        val slimJarExtension = extensions.create("slimJar", SlimJarExtension::class.java, project)
 
         val slimConfig = createConfig(
             SLIM_CONFIGURATION_NAME,
@@ -65,7 +65,7 @@ public class SlimJarPlugin : Plugin<Project> {
             )
         }
 
-        val slimJar = tasks.create(SLIM_JAR_TASK_NAME, SlimJar::class.java, slimConfig)
+        val slimJar = tasks.create(SLIM_JAR_TASK_NAME, SlimJar::class.java, slimConfig, slimJarExtension)
         project.dependencies.extra.set(
             "slimjar",
             asGroovyClosure("+") { version -> slimJarLib(version) }
