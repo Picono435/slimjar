@@ -194,25 +194,21 @@ public abstract class SlimJar @Inject constructor(
                         resolver.resolve(dep)
                     }
                 }.filter { (dep, result) ->
-                    if (result.isEmpty) {
-                        logger.warn("Failed to resolve dependency $dep")
-                        if (extension.requirePreResolve.get()) {
-                            error(
-                                """
-                                Failed to resolve dependency $dep during pre-resolve.
-                                Please ensure that the dependency is available in the global repository.
-                                Or disable required pre-resolve in the slimJar extension.
-                                """.trimIndent()
-                            )
-                        }
+                    if (!result.isEmpty) return@filter true
 
-                        return@filter false
+                    logger.warn("Failed to resolve dependency $dep")
+                    if (extension.requirePreResolve.get()) {
+                        error(
+                            """
+                            Failed to resolve dependency $dep during pre-resolve.
+                            Please ensure that the dependency is available in the gradle repositories or global repositories.
+                            Or disable required pre-resolve in the slimJar extension.
+                            """.trimIndent()
+                        )
                     }
 
-                    true
-                }.map { (dep, result) ->
-                    dep to result.get()
-                }.onEach { (dep, result) ->
+                    false
+                }.map { (dep, result) -> dep to result.get() }.onEach { (dep, result) ->
                     if (!extension.requireChecksum.get() || result.checksumURL != null) return@onEach
                     logger.warn("Failed to resolve checksum for dependency $dep")
                     error(
@@ -255,6 +251,7 @@ public abstract class SlimJar @Inject constructor(
         for (dependency in dependencies) {
             val dep = dependency.id.toString().toDependency(emptySet()) ?: continue
             if (dep in transitive) continue
+            if (dep.artifactId().endsWith("-bom")) continue
 
             transitive.add(dep)
             collectTransitive(transitive, dependency.children)
