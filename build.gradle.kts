@@ -2,6 +2,8 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinBasePlugin
 import java.net.URI
 
+// Workaround for (https://youtrack.jetbrains.com/issue/KTIJ-19369)
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     java
     alias(libs.plugins.kotlin.jvm)

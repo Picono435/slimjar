@@ -1,13 +1,13 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+// Workaround for (https://youtrack.jetbrains.com/issue/KTIJ-19369)
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    alias(libs.plugins.shadow)
     `maven-publish`
     `java-gradle-plugin`
+    alias(libs.plugins.shadow)
     alias(libs.plugins.kotlin.jvm)
-    id("com.gradle.plugin-publish") version "1.1.0"
+    alias(libs.plugins.gradle.publish)
 }
 
 repositories {
@@ -43,24 +43,13 @@ dependencies {
     }
 }
 
-val shadowJarTask = tasks.named("shadowJar", ShadowJar::class.java)
-val relocateShadowJar = tasks.register("relocateShadowJar", ConfigureShadowRelocation::class.java) {
-    target = shadowJarTask.get()
-}
-
-shadowJarTask.configure {
-    dependsOn(relocateShadowJar)
-    archiveClassifier.set("")
-    configurations = listOf(shadowImplementation)
-}
-
 kotlin {
     explicitApi()
 }
 
 // Required for plugin substitution to work in sample projects.
 artifacts {
-    add("runtimeOnly", shadowJarTask)
+    add("runtimeOnly", tasks.shadowJar)
 }
 
 val ensureDependenciesAreInlined by tasks.registering {
@@ -115,7 +104,10 @@ tasks {
         }
     }
 
-    withType<ShadowJar> {
+    shadowJar {
+        archiveClassifier.set("")
+        configurations = listOf(shadowImplementation)
+
         mapOf(
             "io.github.slimjar" to "",
             "me.lucko.jarrelocator" to ".jarrelocator",
@@ -135,27 +127,25 @@ afterEvaluate {
         publications {
             withType<MavenPublication> {
                 if (name == "pluginMaven") {
-                    setArtifacts(listOf(shadowJarTask.get()))
+                    setArtifacts(listOf(tasks.shadowJar.get()))
                 }
             }
         }
     }
 }
 
+@Suppress("UnstableApiUsage")
 gradlePlugin {
+    website.set("https://github.com/DaRacci/slimjar")
+    vcsUrl.set("https://github.com/DaRacci/slimjar")
+
     plugins {
         create("slimjar") {
             id = group.toString()
             displayName = "SlimJar"
             description = "JVM Runtime Dependency Management."
             implementationClass = "io.github.slimjar.SlimJarPlugin"
+            tags.set(listOf("runtime dependency", "relocation"))
         }
     }
-}
-
-pluginBundle {
-    website = "https://github.com/DaRacci/slimjar"
-    vcsUrl = "https://github.com/DaRacci/slimjar"
-    tags = listOf("runtime dependency", "relocation")
-    description = "Very easy to setup and downloads any public dependency at runtime!"
 }
