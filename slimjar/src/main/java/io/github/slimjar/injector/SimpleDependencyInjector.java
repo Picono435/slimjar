@@ -64,7 +64,7 @@ public final class SimpleDependencyInjector implements DependencyInjector {
                 processingDependencies.add(dependency);
 
                 try {
-                    final var depJar = injectionHelper.fetch(dependency);
+                    final java.io.File depJar = injectionHelper.fetch(dependency);
 
                     if (depJar == null) return;
 

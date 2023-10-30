@@ -24,6 +24,7 @@
 
 package io.github.slimjar.injector.loader;
 
+import io.github.slimjar.app.builder.ApplicationBuilder;
 import io.github.slimjar.injector.agent.ByteBuddyInstrumentationFactory;
 import io.github.slimjar.injector.agent.InstrumentationFactory;
 import io.github.slimjar.relocation.facade.ReflectiveJarRelocatorFacadeFactory;
@@ -54,8 +55,8 @@ public final class InstrumentationInjectable implements Injectable {
         instrumentation.appendToSystemClassLoaderSearch(new JarFile(new File(url.toURI())));
     }
 
-    public static Injectable create(final Path downloadPath, final Collection<Repository> repositories) throws IOException, NoSuchAlgorithmException, ReflectiveOperationException, URISyntaxException, InterruptedException {
-        return create(new ByteBuddyInstrumentationFactory(ReflectiveJarRelocatorFacadeFactory.create(downloadPath, repositories)));
+    public static Injectable create(final ApplicationBuilder applicationBuilder, final Path downloadPath, final Collection<Repository> repositories) throws IOException, NoSuchAlgorithmException, ReflectiveOperationException, URISyntaxException, InterruptedException {
+        return create(new ByteBuddyInstrumentationFactory(applicationBuilder, ReflectiveJarRelocatorFacadeFactory.create(downloadPath, repositories)));
     }
 
     public static Injectable create(final InstrumentationFactory factory) throws IOException, NoSuchAlgorithmException, ReflectiveOperationException, URISyntaxException, InterruptedException {

@@ -38,26 +38,28 @@ public final class InjectableFactory {
     private InjectableFactory() {
     }
 
-    public static Injectable create(final Path downloadPath, final Collection<Repository> repositories) throws ReflectiveOperationException, NoSuchAlgorithmException, IOException, URISyntaxException, InterruptedException {
-        return create(downloadPath, repositories, InjectableFactory.class.getClassLoader());
+    public static Injectable create(final ApplicationBuilder applicationBuilder, final Path downloadPath, final Collection<Repository> repositories) throws ReflectiveOperationException, NoSuchAlgorithmException, IOException, URISyntaxException, InterruptedException {
+        return create(applicationBuilder, downloadPath, repositories, InjectableFactory.class.getClassLoader());
     }
 
-    public static Injectable create(final Path downloadPath, final Collection<Repository> repositories, final ClassLoader classLoader) throws URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException, IOException, InterruptedException {
+    public static Injectable create(final ApplicationBuilder applicationBuilder, final Path downloadPath, final Collection<Repository> repositories, final ClassLoader classLoader) throws URISyntaxException, ReflectiveOperationException, NoSuchAlgorithmException, IOException, InterruptedException {
         final boolean isJigsawActive = isJigsawActive();
         Injectable injectable = null;
 
         if (isJigsawActive && classLoader instanceof URLClassLoader) {
             injectable = new WrappedInjectableClassLoader((URLClassLoader) ApplicationBuilder.class.getClassLoader());
-        } else if (isUnsafeAvailable() && classLoader instanceof URLClassLoader urlClassLoader) {
+        } else if (isUnsafeAvailable() && classLoader instanceof URLClassLoader) {
+            URLClassLoader urlClassLoader = (URLClassLoader) classLoader;
             try {
                 injectable = UnsafeInjectable.create(urlClassLoader);
             } catch (final Exception exception) {
                 // failed to prepare injectable with unsafe, ignored exception to let it silently switch to fallback agent injection
+                exception.printStackTrace();
             }
         }
 
         if (injectable == null) {
-            injectable = InstrumentationInjectable.create(downloadPath, repositories);
+            injectable = InstrumentationInjectable.create(applicationBuilder, downloadPath, repositories);
         }
         return injectable;
     }

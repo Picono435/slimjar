@@ -92,7 +92,7 @@ public final class ChecksumDependencyVerifier implements DependencyVerifier {
     private boolean prepareChecksumFile(final File checksumFile, final Dependency dependency) throws IOException {
         final Optional<ResolutionResult> result = resolver.resolve(dependency);
 
-        if (result.isEmpty()) return false;
+        if (!result.isPresent()) return false;
 
         final URL checkSumUrl = result.get().getChecksumURL();
         LOGGER.log("Resolved checksum URL for %s as %s", dependency.artifactId(), checkSumUrl);

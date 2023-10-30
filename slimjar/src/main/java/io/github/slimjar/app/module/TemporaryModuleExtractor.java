@@ -39,11 +39,19 @@ public final class TemporaryModuleExtractor implements ModuleExtractor {
         final File tempFile = File.createTempFile(name, ".jar");
         tempFile.deleteOnExit();
         final URLConnection connection = url.openConnection();
-        if (!(connection instanceof JarURLConnection)) {
-            throw new AssertionError("Invalid Module URL provided(Non-Jar File)");
+        JarFile jarFile;
+        if (connection instanceof JarURLConnection) {
+            final JarURLConnection jarURLConnection = (JarURLConnection) connection;
+            jarFile = jarURLConnection.getJarFile();
+        } else {
+            if(connection.getClass().getName().equals("net.minecraftforge.fml.loading.ModJarURLHandler$ModJarURLConnection")) {
+                try(JarFile jarFile1 = new JarFile(new File(url.toString().replace("modjar", "file")))) {
+                    jarFile = jarFile1;
+                }
+            } else {
+                throw new AssertionError("Invalid Module URL provided(Non-Jar File)");
+            }
         }
-        final JarURLConnection jarURLConnection = (JarURLConnection) connection;
-        final JarFile jarFile = jarURLConnection.getJarFile();
         final ZipEntry module = jarFile.getJarEntry(name + ".isolated-jar");
         if (module == null) {
             throw new ModuleNotFoundException(name);

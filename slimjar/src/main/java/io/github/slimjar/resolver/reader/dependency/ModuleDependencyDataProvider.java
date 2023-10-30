@@ -50,10 +50,11 @@ public final class ModuleDependencyDataProvider implements DependencyDataProvide
         final URL depFileURL = getURL();
 
         final URLConnection connection = depFileURL.openConnection();
-        if (!(connection instanceof final JarURLConnection jarURLConnection)) {
+        if (!(connection instanceof JarURLConnection)) {
             throw new AssertionError("Invalid Module URL provided(Non-Jar File)");
         }
 
+        final JarURLConnection jarURLConnection = (JarURLConnection) connection;
         final JarFile jarFile = jarURLConnection.getJarFile();
         final ZipEntry dependencyFileEntry = jarFile.getEntry("slimjar.json");
         if (dependencyFileEntry == null) {

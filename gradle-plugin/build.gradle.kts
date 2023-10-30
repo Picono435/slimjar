@@ -98,7 +98,7 @@ tasks {
 
     withType<KotlinCompile> {
         kotlinOptions {
-            jvmTarget = "17"
+            jvmTarget = "1.8"
             languageVersion = "1.7"
             freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
         }

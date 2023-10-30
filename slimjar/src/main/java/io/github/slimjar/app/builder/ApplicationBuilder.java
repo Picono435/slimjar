@@ -454,4 +454,7 @@ public abstract class ApplicationBuilder {
 
     protected abstract Application buildApplication() throws IOException, ReflectiveOperationException, URISyntaxException, NoSuchAlgorithmException, InterruptedException;
 
+    public URL getJarURL() {
+        return jarURL;
+    }
 }

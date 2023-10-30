@@ -194,7 +194,7 @@ public abstract class SlimJar @Inject constructor(
                         resolver.resolve(dep)
                     }
                 }.filter { (dep, result) ->
-                    if (!result.isEmpty) return@filter true
+                    if (result.isPresent) return@filter true
 
                     logger.warn("Failed to resolve dependency $dep")
                     if (extension.requirePreResolve.get()) {

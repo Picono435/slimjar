@@ -74,7 +74,7 @@ public final class InjectingApplicationBuilder extends ApplicationBuilder {
     public static ApplicationBuilder createAppending(final String applicationName, final ClassLoader classLoader) {
         return new InjectingApplicationBuilder(applicationName, (ApplicationBuilder builder) -> {
             try {
-                return InjectableFactory.create(builder.getDownloadDirectoryPath(), Collections.singleton(Repository.central()), classLoader);
+                return InjectableFactory.create(builder, builder.getDownloadDirectoryPath(), Collections.singleton(Repository.central()), classLoader);
             } catch (URISyntaxException | ReflectiveOperationException | NoSuchAlgorithmException | IOException | InterruptedException exception) {
                 exception.printStackTrace();
             }

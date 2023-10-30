@@ -35,15 +35,21 @@ import io.github.slimjar.resolver.pinger.URLPinger;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public record PingingRepositoryEnquirer(
-    Repository repository,
-    PathResolutionStrategy dependencyURLCreationStrategy,
-    PathResolutionStrategy checksumURLCreationStrategy,
-    PathResolutionStrategy pomURLCreationStrategy,
-    URLPinger urlPinger
-
-) implements RepositoryEnquirer {
+public final class PingingRepositoryEnquirer implements RepositoryEnquirer {
     private static final ProcessLogger LOGGER = LogDispatcher.getMediatingLogger();
+    private final Repository repository;
+    private final PathResolutionStrategy dependencyURLCreationStrategy;
+    private final PathResolutionStrategy checksumURLCreationStrategy;
+    private final PathResolutionStrategy pomURLCreationStrategy;
+    private final URLPinger urlPinger;
+
+    public PingingRepositoryEnquirer(final Repository repository, final PathResolutionStrategy urlCreationStrategy, final PathResolutionStrategy checksumURLCreationStrategy, final PathResolutionStrategy pomURLCreationStrategy, final URLPinger urlPinger) {
+        this.repository = repository;
+        this.dependencyURLCreationStrategy = urlCreationStrategy;
+        this.checksumURLCreationStrategy = checksumURLCreationStrategy;
+        this.pomURLCreationStrategy = pomURLCreationStrategy;
+        this.urlPinger = urlPinger;
+    }
 
     @Override
     public ResolutionResult enquire(final Dependency dependency) {
@@ -55,7 +61,7 @@ public record PingingRepositoryEnquirer(
                 .filter(urlPinger::ping)
                 .findFirst()
                 .map(url -> {
-                    final var resolvedChecksum = checksumURLCreationStrategy.pathTo(repository, dependency)
+                    final URL resolvedChecksum = checksumURLCreationStrategy.pathTo(repository, dependency)
                             .parallelStream()
                             .map(this::createURL)
                             .filter(urlPinger::ping)
@@ -68,7 +74,7 @@ public record PingingRepositoryEnquirer(
                         .findFirst()
                         .map(url -> new ResolutionResult(repository, null, null, true, false))
                         .orElse(null)
-        );
+                );
     }
 
     @Override

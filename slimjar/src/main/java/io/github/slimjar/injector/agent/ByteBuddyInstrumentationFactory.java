@@ -40,10 +40,14 @@ import io.github.slimjar.resolver.data.Dependency;
 import io.github.slimjar.resolver.data.DependencyData;
 import io.github.slimjar.resolver.data.Repository;
 import io.github.slimjar.util.Packages;
+import sun.management.VMManagement;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -62,9 +66,18 @@ public final class ByteBuddyInstrumentationFactory implements InstrumentationFac
     private final ModuleExtractor extractor;
     private final JarRelocatorFacadeFactory relocatorFacadeFactory;
 
-    public ByteBuddyInstrumentationFactory(final JarRelocatorFacadeFactory relocatorFacadeFactory) {
+    public ByteBuddyInstrumentationFactory(final ApplicationBuilder applicationBuilder, final JarRelocatorFacadeFactory relocatorFacadeFactory) {
         this.relocatorFacadeFactory = relocatorFacadeFactory;
-        this.agentJarUrl = InstrumentationInjectable.class.getClassLoader().getResource(AGENT_JAR);
+        URL agentJarUrlTemp;
+        agentJarUrlTemp = InstrumentationInjectable.class.getClassLoader().getResource(AGENT_JAR);
+        if(agentJarUrlTemp.getProtocol().equals("modjar")) {
+            try {
+                agentJarUrlTemp = new URL("jar:" + applicationBuilder.getJarURL().toString() + "!/" + AGENT_JAR);
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        this.agentJarUrl = agentJarUrlTemp;
         this.extractor = new TemporaryModuleExtractor();
     }
 
@@ -95,19 +108,30 @@ public final class ByteBuddyInstrumentationFactory implements InstrumentationFac
                 .generate();
 
         ApplicationBuilder.injecting("SlimJar-Agent", classLoader)
-                .dataProviderFactory(dataUrl -> ByteBuddyInstrumentationFactory::getDependency)
-                .relocatorFactory(rules -> new PassthroughRelocator())
-                .relocationHelperFactory(rel -> (dependency, file) -> file)
+                .dataProviderFactory((dataUrl) -> ByteBuddyInstrumentationFactory::getDependency)
+                .relocatorFactory((rules) -> new PassthroughRelocator())
+                .relocationHelperFactory((rel) -> (dependency, file) -> file)
                 .build();
 
         final Class<?> byteBuddyAgentClass = Class.forName(Packages.fix(BYTE_BUDDY_AGENT_CLASS), true, classLoader);
         final Method attachMethod = byteBuddyAgentClass.getMethod("attach", File.class, String.class, String.class);
 
-        final Class<?> processHandle = Class.forName("java.lang.ProcessHandle");
-        final Method currentMethod = processHandle.getMethod("current");
-        final Method pidMethod = processHandle.getMethod("pid");
-        final Object currentProcess = currentMethod.invoke(processHandle);
-        final Long processId = (Long) pidMethod.invoke(currentProcess);
+        Long processId;
+        try {
+            final Class<?> processHandle = Class.forName("java.lang.ProcessHandle");
+            final Method currentMethod = processHandle.getMethod("current");
+            final Method pidMethod = processHandle.getMethod("pid");
+            final Object currentProcess = currentMethod.invoke(processHandle);
+            processId = (Long) pidMethod.invoke(currentProcess);
+        } catch (Exception exception) {
+            RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+            Field jvm = runtime.getClass().getDeclaredField("jvm");
+            jvm.setAccessible(true);
+            VMManagement management = (VMManagement) jvm.get(runtime);
+            Method method = management.getClass().getDeclaredMethod("getProcessId");
+            method.setAccessible(true);
+            processId = Long.valueOf((Integer) method.invoke(management));
+        }
 
         attachMethod.invoke(null, relocatedFile, String.valueOf(processId), "");
 
@@ -135,6 +159,6 @@ public final class ByteBuddyInstrumentationFactory implements InstrumentationFac
     }
 
     private static String generatePattern() {
-        return String.format("slimjar.%s", UUID.randomUUID());
+        return String.format("slimjar.%s", UUID.randomUUID().toString());
     }
 }

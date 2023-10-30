@@ -7,7 +7,7 @@
 
   outputs = { self, nixpkgs }:
     let
-      javaVersion = 20;
+      javaVersion = 8;
 
       overlays = [
         (final: prev: rec {

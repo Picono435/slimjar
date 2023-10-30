@@ -67,15 +67,15 @@ public final class CachingDependencyResolver implements DependencyResolver {
         final Dependency dependency,
         final List<RepositoryEnquirer> enforcedRepositories
     ) {
-        final var preResolvedResult = preResolvedResults.get(dependency.toString()) != null ? preResolvedResults.get(dependency.toString()) : cachedResults.get(dependency);
+        final ResolutionResult preResolvedResult = preResolvedResults.get(dependency.toString()) != null ? preResolvedResults.get(dependency.toString()) : cachedResults.get(dependency);
 
         if (preResolvedResult != null) {
             if (preResolvedResult.isChecked()) return preResolvedResult;
             if (preResolvedResult.isAggregator()) return preResolvedResult;
 
-            final var preResolvedUrl = preResolvedResult.getRepository().url().toString();
-            final var isDependencyValid = (enforcedRepositories.isEmpty() || enforcedRepositories.stream().anyMatch(repo -> repo.toString().equals(preResolvedUrl))) && urlPinger.ping(preResolvedResult.getDependencyURL());
-            final var isChecksumValid = preResolvedResult.getChecksumURL() == null || urlPinger.ping(preResolvedResult.getChecksumURL());
+            final String preResolvedUrl = preResolvedResult.getRepository().url().toString();
+            final boolean isDependencyValid = (enforcedRepositories.isEmpty() || enforcedRepositories.stream().anyMatch(repo -> repo.toString().equals(preResolvedUrl))) && urlPinger.ping(preResolvedResult.getDependencyURL());
+            final boolean isChecksumValid = preResolvedResult.getChecksumURL() == null || urlPinger.ping(preResolvedResult.getChecksumURL());
 
             if (isDependencyValid && isChecksumValid) {
                 preResolvedResult.setChecked();
@@ -83,12 +83,12 @@ public final class CachingDependencyResolver implements DependencyResolver {
             }
         }
 
-        final var usedRepositories = enforcedRepositories.isEmpty() ? repositories : enforcedRepositories;
-        final var result = usedRepositories.stream().parallel()
+        final Collection<RepositoryEnquirer> usedRepositories = enforcedRepositories.isEmpty() ? repositories : enforcedRepositories;
+        final Optional<ResolutionResult> result = usedRepositories.stream().parallel()
                 .map(repositoryEnquirer -> repositoryEnquirer.enquire(dependency))
                 .filter(Objects::nonNull)
                 .findFirst();
-        final var resolvedResult = result.map(ResolutionResult::getDependencyURL)
+        final String resolvedResult = result.map(ResolutionResult::getDependencyURL)
                 .map(Objects::toString)
                 .orElse(FAILED_RESOLUTION_MESSAGE);
 
