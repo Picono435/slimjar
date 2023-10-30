@@ -47,11 +47,17 @@ publishing {
                     email.set("racci@racci.dev")
                     roles.set(listOf("MAINTAINER"))
                 }
+                developer {
+                    id.set("Picono435")
+                    name.set("Picono435")
+                    email.set("picono435@gmail.com")
+                    roles.set(listOf("MAINTAINER"))
+                }
             }
             scm {
-                connection.set("https://github.com/DaRacci/slimjar")
-                developerConnection.set("https://github.com/DaRacci/slimjar.git")
-                url.set("https://github.com/DaRacci/slimjar")
+                connection.set("https://github.com/Picono435/slimjar")
+                developerConnection.set("https://github.com/Picono435/slimjar.git")
+                url.set("https://github.com/Picono435/slimjar")
             }
         }
     }
