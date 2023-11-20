@@ -33,6 +33,7 @@ import io.github.slimjar.resolver.ResolutionResult;
 import io.github.slimjar.resolver.data.Dependency;
 import io.github.slimjar.util.Connections;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,17 +95,19 @@ public final class ChecksumDependencyVerifier implements DependencyVerifier {
 
         if (!result.isPresent()) return false;
 
-        final URL checkSumUrl = result.get().getChecksumURL();
+        /*final URL checkSumUrl = result.get().getChecksumURL();
         LOGGER.log("Resolved checksum URL for %s as %s", dependency.artifactId(), checkSumUrl);
         if (checkSumUrl == null) {
             checksumFile.createNewFile();
             return true;
         }
-        final URLConnection connection = Connections.createDownloadConnection(checkSumUrl);
-        final InputStream inputStream = connection.getInputStream();
+        final URLConnection connection = Connections.createDownloadConnection(checkSumUrl);*/
+
+        final String checksum = result.get().getChecksum();
+        final InputStream inputStream = new ByteArrayInputStream(checksum.getBytes());
         final OutputWriter outputWriter = outputWriterFactory.create(dependency);
-        outputWriter.writeFrom(inputStream, connection.getContentLength());
-        Connections.tryDisconnect(connection);
+        outputWriter.writeFrom(inputStream, checksum.getBytes().length);
+        //Connections.tryDisconnect(connection);
         LOGGER.log("Downloaded checksum for %s", dependency.artifactId());
 
         return true;

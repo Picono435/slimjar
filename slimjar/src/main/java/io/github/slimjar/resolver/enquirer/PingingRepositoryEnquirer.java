@@ -32,8 +32,14 @@ import io.github.slimjar.resolver.data.Repository;
 import io.github.slimjar.resolver.strategy.PathResolutionStrategy;
 import io.github.slimjar.resolver.pinger.URLPinger;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public final class PingingRepositoryEnquirer implements RepositoryEnquirer {
     private static final ProcessLogger LOGGER = LogDispatcher.getMediatingLogger();
@@ -61,18 +67,42 @@ public final class PingingRepositoryEnquirer implements RepositoryEnquirer {
                 .filter(urlPinger::ping)
                 .findFirst()
                 .map(url -> {
-                    final URL resolvedChecksum = checksumURLCreationStrategy.pathTo(repository, dependency)
+                     final URL resolvedChecksum = checksumURLCreationStrategy.pathTo(repository, dependency)
                             .parallelStream()
                             .map(this::createURL)
                             .filter(urlPinger::ping)
                             .findFirst()
                             .orElse(null);
+                    if(resolvedChecksum == null) {
+                        try {
+                            final URL url1 = dependencyURLCreationStrategy.pathTo(repository, dependency)
+                                    .parallelStream()
+                                    .map(this::createURL)
+                                    .filter(urlPinger::ping)
+                                    .findFirst()
+                                    .orElse(null);
+                            if(url1 != null) {
+                                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                                InputStream is = url1.openStream();
+                                byte[] byteChunk = new byte[4096]; // Or whatever size you want to read in at a time.
+                                int n;
+                                while ( (n = is.read(byteChunk)) > 0 ) {
+                                    outputStream.write(byteChunk, 0, n);
+                                }
+                                byte[] hash = MessageDigest.getInstance("SHA-256").digest(outputStream.toByteArray());
+                                String checksum = new BigInteger(1, hash).toString(16);
+                                return new ResolutionResult(repository, url, checksum, false, true);
+                            }
+                        } catch (NoSuchAlgorithmException | IOException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
                     return new ResolutionResult(repository, url, resolvedChecksum, false, true);
                 }).orElseGet(() -> pomURLCreationStrategy.pathTo(repository, dependency).parallelStream()
                         .map(this::createURL)
                         .filter(urlPinger::ping)
                         .findFirst()
-                        .map(url -> new ResolutionResult(repository, null, null, true, false))
+                        .map(url -> new ResolutionResult(repository, null, (URL) null, true, false))
                         .orElse(null)
                 );
     }

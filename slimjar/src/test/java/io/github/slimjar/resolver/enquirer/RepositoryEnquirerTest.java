@@ -45,8 +45,8 @@ public class RepositoryEnquirerTest {
 
     @Test
     public void testPingingEnquirerProvideValidURL() {
-        final var pinger = Mockito.mock(URLPinger.class, defaultAnswer -> true);
-        final var resolutionStrategy = Mockito.mock(PathResolutionStrategy.class, defaultAnswer -> Collections.singleton("https://a.b.c/repo/dep.jar"));
+        final URLPinger pinger = Mockito.mock(URLPinger.class, defaultAnswer -> true);
+        final PathResolutionStrategy resolutionStrategy = Mockito.mock(PathResolutionStrategy.class, defaultAnswer -> Collections.singleton("https://a.b.c/repo/dep.jar"));
 
         final RepositoryEnquirer repositoryEnquirer = new PingingRepositoryEnquirer(
             new Repository(Mockito.mock(URL.class)),
@@ -61,9 +61,9 @@ public class RepositoryEnquirerTest {
 
     @Test
     public void testPingingEnquirerProvideInvalidURL() {
-        final var mockURL = Mockito.mock(URL.class);
-        final var mockPinger = Mockito.mock(URLPinger.class);
-        final var resolutionStrategy = Mockito.mock(PathResolutionStrategy.class);
+        final URL mockURL = Mockito.mock(URL.class);
+        final URLPinger mockPinger = Mockito.mock(URLPinger.class);
+        final PathResolutionStrategy resolutionStrategy = Mockito.mock(PathResolutionStrategy.class);
 
         Mockito.doReturn(Collections.singleton("https://a.b.c/repo/dep.jar"))
             .when(resolutionStrategy)
@@ -79,10 +79,10 @@ public class RepositoryEnquirerTest {
 
     @Test
     public void testPingingEnquirerProvideMalformedURL() {
-        final var mockURL = Mockito.mock(URL.class);
-        final var mockPinger = Mockito.mock(URLPinger.class);
-        final var resolutionStrategy = Mockito.mock(PathResolutionStrategy.class);
-        final var repository = new Repository(mockURL);
+        final URL mockURL = Mockito.mock(URL.class);
+        final URLPinger mockPinger = Mockito.mock(URLPinger.class);
+        final PathResolutionStrategy resolutionStrategy = Mockito.mock(PathResolutionStrategy.class);
+        final Repository repository = new Repository(mockURL);
 
         Mockito.doReturn(Collections.singleton("some_malformed_url")).when(resolutionStrategy).pathTo(repository, null);
 

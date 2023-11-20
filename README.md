@@ -17,6 +17,15 @@
 
 <hr>
 
+<h4>SlimJar Fork</h4>
+Hey I am Picono435 a mod and plugin minecraft developer. This version of slimjar is forked from DaRacci/slimJar which forks from the original slimJar.
+<br>Added features:
+- Added support for SHA-256
+- Added support for Forge and Sponge mod/plugin loaders
+- Changed from saving checksum URLs to save checksums themselves
+- Downgraded version to Java 8
+
+Keep in mind that this fork was developed to support my own plugins and mods in different minecraft loaders.
 <h4>What is SlimJar?</h4>
 
 SlimJar allows you to download and load up dependencies at runtime as an alternative to shading your dependencies. This helps you reduce build output size and share downloaded dependencies between projects at client side. It is built mainly with the gradle eco-system in mind and is easily configurable being an almost a drop-in replacement/add-on to gradle projects.

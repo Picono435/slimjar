@@ -69,22 +69,22 @@ public class ModuleDependencyDataProviderTest {
 
     @Test
     public void testModuleDependencyDataProviderNonEmpty() throws Exception {
-        final var mockDependencyData = new MockDependencyData();
-        final var mockURL = Mockito.mock(URL.class);
-        final var zipEntry = Mockito.mock(ZipEntry.class);
-        final var inputStream = mockDependencyData.getDependencyDataInputStream();
+        final MockDependencyData mockDependencyData = new MockDependencyData();
+        final URL mockURL = Mockito.mock(URL.class);
+        final ZipEntry zipEntry = Mockito.mock(ZipEntry.class);
+        final InputStream inputStream = mockDependencyData.getDependencyDataInputStream();
 
-        final var jarURLConnection = createJarConnection(zipEntry, inputStream);
-        final var mockProvider = createProvider(mockURL, jarURLConnection);
+        final JarURLConnection jarURLConnection = createJarConnection(zipEntry, inputStream);
+        final ModuleDependencyDataProvider mockProvider = createProvider(mockURL, jarURLConnection);
 
         Assertions.assertEquals(mockDependencyData.getExpectedSample(), mockProvider.get(), "Read and provide proper dependencies");
     }
 
     @Test
     public void testModuleDependencyDataProviderEmpty() throws Exception {
-        final var mockUrl = Mockito.mock(URL.class);
-        final var jarURLConnection = createJarConnection(null, null);
-        final var emptyDependency = new DependencyData(
+        final URL mockUrl = Mockito.mock(URL.class);
+        final JarURLConnection jarURLConnection = createJarConnection(null, null);
+        final DependencyData emptyDependency = new DependencyData(
                 Collections.emptySet(),
                 Collections.emptySet(),
                 Collections.emptySet(),
@@ -97,8 +97,8 @@ public class ModuleDependencyDataProviderTest {
 
     @Test
     public void testModuleDependencyDataProviderExceptionIfNonJar() throws Exception {
-        final var mockUrl = Mockito.mock(URL.class);
-        final var urlConnection = Mockito.mock(HttpURLConnection.class);
+        final URL mockUrl = Mockito.mock(URL.class);
+        final HttpURLConnection urlConnection = Mockito.mock(HttpURLConnection.class);
         final DependencyDataProvider dependencyDataProvider = createProvider(mockUrl, urlConnection);
 
         Mockito.doReturn(urlConnection).when(mockUrl).openConnection();
@@ -117,7 +117,7 @@ public class ModuleDependencyDataProviderTest {
         final URL url,
         final Object jarURLConnection
     ) throws IOException, ReflectiveOperationException, NoSuchAlgorithmException, URISyntaxException, InterruptedException {
-        final var mockProvider = Mockito.mock(ModuleDependencyDataProvider.class, Mockito.withSettings().useConstructor(new GsonDependencyReader(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS).createFacade()), url));
+        final ModuleDependencyDataProvider mockProvider = Mockito.mock(ModuleDependencyDataProvider.class, Mockito.withSettings().useConstructor(new GsonDependencyReader(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS).createFacade()), url));
 
         Mockito.doReturn(url).when(mockProvider).getURL();
         Mockito.doCallRealMethod().when(mockProvider).get();
@@ -130,8 +130,8 @@ public class ModuleDependencyDataProviderTest {
         final ZipEntry zipEntry,
         final InputStream inputStream
     ) throws IOException {
-        final var jarURLConnection = Mockito.mock(JarURLConnection.class);
-        final var jarFile = Mockito.mock(JarFile.class);
+        final JarURLConnection jarURLConnection = Mockito.mock(JarURLConnection.class);
+        final JarFile jarFile = Mockito.mock(JarFile.class);
 
         Mockito.doReturn(jarFile).when(jarURLConnection).getJarFile();
         Mockito.doReturn(zipEntry).when(jarFile).getEntry("slimjar.json");

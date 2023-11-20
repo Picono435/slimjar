@@ -62,9 +62,9 @@ public class URLDependencyDataProviderTest {
 
     @Test
     public void testFileDependencyDataProvider() throws Exception {
-        final var mockDependencyData = new MockDependencyData();
-        final var mockURL = Mockito.mock(URL.class);
-        final var mockConnection = Mockito.mock(URLConnection.class);
+        final MockDependencyData mockDependencyData = new MockDependencyData();
+        final URL mockURL = Mockito.mock(URL.class);
+        final URLConnection mockConnection = Mockito.mock(URLConnection.class);
 
         Mockito.when(mockURL.openConnection()).thenReturn(mockConnection);
         Mockito.when(mockConnection.getInputStream()).thenReturn(mockDependencyData.getDependencyDataInputStream());
@@ -75,8 +75,8 @@ public class URLDependencyDataProviderTest {
 
     @Test
     public void testFileDependencyDataProviderReturnReader() throws Exception {
-        final var mockDependencyData = new MockDependencyData();
-        final var mockURL = Mockito.mock(URL.class);
+        final MockDependencyData mockDependencyData = new MockDependencyData();
+        final URL mockURL = Mockito.mock(URL.class);
 
         Mockito.when(mockURL.openStream()).thenReturn(mockDependencyData.getDependencyDataInputStream());
 
@@ -87,9 +87,9 @@ public class URLDependencyDataProviderTest {
 
     @Test
     public void testFileDependencyDataProviderOnUrlException() throws Exception {
-        final var mockURL = Mockito.mock(URL.class);
-        final var mockReader = Mockito.mock(DependencyReader.class);
-        final var mockConnection = Mockito.mock(URLConnection.class);
+        final URL mockURL = Mockito.mock(URL.class);
+        final DependencyReader mockReader = Mockito.mock(DependencyReader.class);
+        final URLConnection mockConnection = Mockito.mock(URLConnection.class);
         final Exception expectedException = new IOException();
 
         Mockito.when(mockURL.openConnection()).thenReturn(mockConnection);

@@ -36,8 +36,8 @@ public class URLPingerTest {
 
     @Test
     public void testHttpURLPingerHttp() throws IOException {
-        final var mockURL = Mockito.mock(URL.class);
-        final var httpURLConnection = Mockito.mock(HttpURLConnection.class);
+        final URL mockURL = Mockito.mock(URL.class);
+        final HttpURLConnection httpURLConnection = Mockito.mock(HttpURLConnection.class);
 
         Mockito.when(mockURL.openConnection()).thenReturn(httpURLConnection);
         Mockito.when(mockURL.getProtocol()).thenReturn("HTTP");
@@ -52,8 +52,8 @@ public class URLPingerTest {
 
     @Test
     public void testHttpURLPingerHttps() throws IOException {
-        final var mockURL = Mockito.mock(URL.class);
-        final var httpsURLConnection = Mockito.mock(HttpsURLConnection.class);
+        final URL mockURL = Mockito.mock(URL.class);
+        final HttpsURLConnection httpsURLConnection = Mockito.mock(HttpsURLConnection.class);
 
         Mockito.when(mockURL.openConnection()).thenReturn(httpsURLConnection);
         Mockito.when(mockURL.getProtocol()).thenReturn("HTTPS");
@@ -68,8 +68,8 @@ public class URLPingerTest {
 
     @Test
     public void testHttpURLPingerFailIfNotOk() throws IOException {
-        final var mockURL = Mockito.mock(URL.class);
-        final var httpsURLConnection = Mockito.mock(HttpsURLConnection.class);
+        final URL mockURL = Mockito.mock(URL.class);
+        final HttpsURLConnection httpsURLConnection = Mockito.mock(HttpsURLConnection.class);
 
         Mockito.when(mockURL.openConnection()).thenReturn(httpsURLConnection);
         Mockito.when(mockURL.getProtocol()).thenReturn("HTTPS");
@@ -84,8 +84,8 @@ public class URLPingerTest {
 
     @Test
     public void testHttpURLPingerExceptionOnPing() throws IOException {
-        final var mockUrl = Mockito.mock(URL.class);
-        final var httpsURLConnection = Mockito.mock(HttpsURLConnection.class);
+        final URL mockUrl = Mockito.mock(URL.class);
+        final HttpsURLConnection httpsURLConnection = Mockito.mock(HttpsURLConnection.class);
 
         Mockito.when(mockUrl.openConnection()).thenReturn(httpsURLConnection);
         Mockito.when(mockUrl.getProtocol()).thenReturn("HTTPS");
@@ -100,8 +100,8 @@ public class URLPingerTest {
 
     @Test
     public void testHttpURLPingerUnsupportedProtocol() {
-        final var mockURL = Mockito.mock(URL.class);
-        final var urlPinger = new HttpURLPinger();
+        final URL mockURL = Mockito.mock(URL.class);
+        final HttpURLPinger urlPinger = new HttpURLPinger();
 
         Mockito.doReturn("NON-EXISTENT-PROTOCOL").when(mockURL).getProtocol();
         boolean result = urlPinger.ping(mockURL);

@@ -36,7 +36,7 @@ public final class DummyRepositoryEnquirer implements RepositoryEnquirer {
     public ResolutionResult enquire(final Dependency dependency) {
         final String groupPath = dependency.groupId().replace('.', '/');
         try {
-            return new ResolutionResult(new Repository(new URL("https://repo.tld")), new URL(String.format("https://repo.tld/%s/%s/%s/%2$s-%3$s.jar", groupPath, dependency.artifactId(), dependency.version())), null, false, false);
+            return new ResolutionResult(new Repository(new URL("https://repo.tld")), new URL(String.format("https://repo.tld/%s/%s/%s/%2$s-%3$s.jar", groupPath, dependency.artifactId(), dependency.version())), (URL)null, false, false);
         } catch (MalformedURLException e) {
             e.printStackTrace();
             return null;

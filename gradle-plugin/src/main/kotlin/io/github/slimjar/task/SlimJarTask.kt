@@ -27,6 +27,7 @@ package io.github.slimjar.task
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.TypeAdapter
 import com.google.gson.reflect.TypeToken
 import io.github.slimjar.SLIM_API_CONFIGURATION_NAME
 import io.github.slimjar.SlimJarExtension
@@ -158,7 +159,7 @@ public abstract class SlimJar @Inject constructor(
         val snapshotStrategy = MavenSnapshotPathResolutionStrategy()
         val resolutionStrategy = MediatingPathResolutionStrategy(releaseStrategy, snapshotStrategy)
         val pomURLCreationStrategy = MavenPomPathResolutionStrategy()
-        val checksumResolutionStrategy = MavenChecksumPathResolutionStrategy("SHA-1", resolutionStrategy)
+        val checksumResolutionStrategy = MavenChecksumPathResolutionStrategy("SHA-256", resolutionStrategy)
         val urlPinger = HttpURLPinger()
         val enquirerFactory = PingingRepositoryEnquirerFactory(
             resolutionStrategy,
@@ -209,7 +210,7 @@ public abstract class SlimJar @Inject constructor(
 
                     false
                 }.map { (dep, result) -> dep to result.get() }.onEach { (dep, result) ->
-                    if (!extension.requireChecksum.get() || result.checksumURL != null) return@onEach
+                    if (!extension.requireChecksum.get() || result.checksum != null) return@onEach
                     logger.warn("Failed to resolve checksum for dependency $dep")
                     error(
                         """

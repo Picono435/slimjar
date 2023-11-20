@@ -25,14 +25,21 @@
 package io.github.slimjar.resolver;
 
 import io.github.slimjar.resolver.data.Repository;
+import io.github.slimjar.util.Connections;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public final class ResolutionResult {
     private final Repository repository;
     private final URL dependencyURL;
-    private final URL checksumURL;
+    private final String checksum;
     private final boolean isAggregator;
     private transient boolean checked;
 
@@ -43,9 +50,19 @@ public final class ResolutionResult {
             final boolean isAggregator,
             final boolean checked
     ) {
+        this(repository, dependencyURL, getChecksumFromURL(checksumURL), isAggregator, checked);
+    }
+
+    public ResolutionResult(
+            final Repository repository,
+            final URL dependencyURL,
+            final String checksum,
+            final boolean isAggregator,
+            final boolean checked
+    ) {
         this.repository = repository;
         this.dependencyURL = dependencyURL;
-        this.checksumURL = checksumURL;
+        this.checksum = checksum;
         this.isAggregator = isAggregator;
         this.checked = checked;
 
@@ -62,8 +79,8 @@ public final class ResolutionResult {
         return dependencyURL;
     }
 
-    public URL getChecksumURL() {
-        return checksumURL;
+    public String getChecksum() {
+        return checksum;
     }
 
     public boolean isAggregator() {
@@ -85,13 +102,34 @@ public final class ResolutionResult {
         ResolutionResult that = (ResolutionResult) o;
         // String comparison to avoid all blocking calls
         return dependencyURL.toString().equals(that.toString()) &&
-                Objects.equals(checksumURL.toString(), that.checksumURL.toString()) &&
+                Objects.equals(checksum, that.checksum) &&
                 isAggregator == that.isAggregator &&
                 checked == that.checked;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dependencyURL.toString(), checksumURL.toString(), isAggregator, checked);
+        return Objects.hash(dependencyURL.toString(), checksum, isAggregator, checked);
+    }
+
+    private static String getChecksumFromURL(URL checksumURL) {
+        if(checksumURL == null) {
+            return null;
+        }
+        try {
+            final URLConnection connection = Connections.createDownloadConnection(checksumURL);
+            final InputStream inputStream = connection.getInputStream();
+            int bufferSize = 1024;
+            char[] buffer = new char[bufferSize];
+            StringBuilder out = new StringBuilder();
+            Reader in = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            for (int numRead; (numRead = in.read(buffer, 0, buffer.length)) > 0; ) {
+                out.append(buffer, 0, numRead);
+            }
+            return out.toString();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
     }
 }

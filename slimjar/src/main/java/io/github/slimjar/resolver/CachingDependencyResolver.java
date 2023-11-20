@@ -75,9 +75,9 @@ public final class CachingDependencyResolver implements DependencyResolver {
 
             final String preResolvedUrl = preResolvedResult.getRepository().url().toString();
             final boolean isDependencyValid = (enforcedRepositories.isEmpty() || enforcedRepositories.stream().anyMatch(repo -> repo.toString().equals(preResolvedUrl))) && urlPinger.ping(preResolvedResult.getDependencyURL());
-            final boolean isChecksumValid = preResolvedResult.getChecksumURL() == null || urlPinger.ping(preResolvedResult.getChecksumURL());
+            //final boolean isChecksumValid = preResolvedResult.getChecksum() == null;
 
-            if (isDependencyValid && isChecksumValid) {
+            if (isDependencyValid /*&& isChecksumValid*/) {
                 preResolvedResult.setChecked();
                 return preResolvedResult;
             }
